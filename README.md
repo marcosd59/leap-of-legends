@@ -12,6 +12,8 @@
 
 ## Capturas de pantalla
 
+### Nivel 1 -  Salto del Novato
+
 ![NIVEL 1](./public/screenshots/leap-of-legneds-level1-v0.png)
 
 ## Tecnologías utilizadas
