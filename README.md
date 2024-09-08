@@ -10,6 +10,10 @@
 - **Barra de vida:** Administra la vida de tu personaje mientras enfrentas enemigos.
 - **Diseño responsivo:** La interfaz del juego se adapta a diferentes tamaños de pantalla.
 
+## Capturas de pantalla
+
+![NIVEL 1](./public/screenshots/leap-of-legneds-level1-v0.png)
+
 ## Tecnologías utilizadas
 
 - **React**: Para la interfaz de usuario y la navegación de la aplicación.
@@ -36,9 +40,9 @@ git --version
 Si deseas contribuir a este proyecto:
 
 1. Haz un fork del repositorio.
-2. Crea tu feature branch (git checkout -b feature/nuevo-nivel).
-3. Commit tus cambios (git commit -m 'Se agrega el nivel 3').
-4. Haz push a la rama (git push origin feature/nuevo-nivel).
+2. Crea tu feature branch (git checkout -b feature/nivel-3-nieve).
+3. Commit tus cambios (git commit -m 'Se agrega el nivel 3 por Marcos').
+4. Haz push a la rama (git push origin feature/nivel-3-nieve).
 5. Abre una pull request.
 
 ## Contacto
