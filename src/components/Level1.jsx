@@ -2,11 +2,9 @@ import { useEffect, useRef } from "react";
 import Phaser from "phaser";
 
 const Level1 = () => {
-  // Referencia al contenedor del juego para que Phaser lo monte dentro del componente de React
   const gameContainer = useRef(null);
 
   useEffect(() => {
-    // Configuración inicial del juego Phaser
     const config = {
       type: Phaser.AUTO,
       scale: {
@@ -18,65 +16,67 @@ const Level1 = () => {
       physics: {
         default: "arcade",
         arcade: {
-          gravity: { y: 300 }, // Gravedad del juego (caída de los objetos)
-          debug: true, /***** DESACTIVAR PARA LANZAR EL JUEGO ********/
+          gravity: { y: 300 },
+          debug: true,
         },
       },
       scene: {
-        preload, // Función para precargar los recursos del juego
-        create, // Función para crear los elementos del juego
-        update, // Función para actualizar el estado del juego en cada frame
+        preload,
+        create,
+        update,
       },
       parent: gameContainer.current,
     };
 
-    // Creación de una instancia de Phaser con la configuración dada
     const game = new Phaser.Game(config);
 
-    // Precarga de recursos (imágenes, sprites, etc.)
     function preload() {
       this.load.image("sky", "/assets/level1/sky.png");
       this.load.image("ground", "/assets/level1/platform.png");
       this.load.image("star", "/assets/level1/star.png");
       this.load.image("diamond", "/assets/level1/diamond.png");
+      this.load.image("speedBoost", "/assets/level1/velocidad.png");
       this.load.spritesheet("dude", "/assets/level1/dude.png", {
         frameWidth: 32,
         frameHeight: 48,
       });
+      this.load.image("heart", "/assets/level1/heart.png");
       this.load.spritesheet("baddie", "/assets/level1/baddie.png", {
         frameWidth: 32,
         frameHeight: 32,
       });
+
+      // COMENTADO POR AHORA
+      // this.load.audio("backgroundMusic", "/assets/level1/music.mp3");
     }
 
-    // Variables globales para los objetos del juego
     let player;
     let platforms;
     let cursors;
     let stars;
     let diamonds;
+    let speedBoosts;
     let score = 0;
     let scoreText;
     let background;
+    let speedBoostActive = true;
+    let hearts;
+    let lives = 3;
+    let baddies;
 
-    // Creación de los elementos del juego
     function create() {
-      // Añade un fondo que se repite en el eje X
-      background = this.add.tileSprite(0, 0, 1600, 800, "sky");
-      background.setOrigin(0).setScrollFactor(0); // Fija el fondo para que no se mueva con la cámara
+      background = this.add.tileSprite(0, 0, 8000, 1800, "sky");
+      background.setOrigin(0, 0);
+      background.setScale(0.5);
 
-      // Configura los límites de la cámara y el mundo del juego
       this.cameras.main.setBounds(0, 0, 4000, 800);
       this.physics.world.setBounds(0, 0, 4000, 800);
 
-      // Crea un grupo de plataformas estáticas
       platforms = this.physics.add.staticGroup();
 
-      // Crea la plataforma del suelo
       const ground = platforms.create(0, this.scale.height - 32, "ground");
-      ground.setScale(30, 2).refreshBody();
+      ground.setScale(60, 2).refreshBody();
 
-      // Crea otras plataformas estáticas en posiciones específicas
       platforms.create(500, 600, "ground").refreshBody();
       platforms.create(-150, 450, "ground").refreshBody();
       platforms.create(850, 350, "ground").refreshBody();
@@ -84,19 +84,13 @@ const Level1 = () => {
       platforms.create(1500, 400, "ground").refreshBody();
       platforms.create(2500, 250, "ground").refreshBody();
 
-      // Crea el jugador y configura sus propiedades físicas
       player = this.physics.add.sprite(32, this.scale.height - 150, "dude");
-      player.setBounce(0.2); // Establece el rebote del jugador
-      player.setCollideWorldBounds(true); // Previene que el jugador salga de los límites del mundo
+      player.setBounce(0.2);
+      player.setCollideWorldBounds(true);
 
-      // Configura la cámara para que siga al jugador
       this.cameras.main.startFollow(player);
-      this.cameras.main.setBounds(0, 0, 4000, 800);
-
-      // Añade colisiones entre el jugador y las plataformas
       this.physics.add.collider(player, platforms);
 
-      // Define las animaciones del jugador
       this.anims.create({
         key: "left",
         frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
@@ -111,99 +105,165 @@ const Level1 = () => {
         repeat: -1,
       });
 
-      // Crea un grupo de estrellas colectables
-      stars = this.physics.add.group({
-        key: "star",
-        repeat: 20, // Número de estrellas
-        setXY: { x: 12, y: 0, stepX: 150 }, // Posición inicial y espaciado
-      });
+      // Añadir y reproducir música de fondo
+      // const music = this.sound.add("backgroundMusic");
+      // music.play({ loop: true }); // Reproducir en bucle
 
-      // Configura el rebote de cada estrella
+      stars = this.physics.add.group();
+      stars.create(100, 300, "star");
+      stars.create(400, 500, "star");
+      stars.create(700, 200, "star");
+
       stars.children.iterate(function (child) {
-        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+        child.setBounceY(Phaser.Math.FloatBetween(0.6, 0.8));
       });
 
-      // Añade colisiones entre las estrellas y las plataformas
       this.physics.add.collider(stars, platforms);
-
-      // Detecta cuando el jugador recoge una estrella
       this.physics.add.overlap(player, stars, collectStar, null, this);
 
-      // Crea un grupo de diamantes colectables
-      diamonds = this.physics.add.group({
-        key: "diamond",
-        repeat: 5, // Número de diamantes
-        setXY: { x: 400, y: 0, stepX: 400 }, // Posición inicial y espaciado
-      });
+      diamonds = this.physics.add.group();
+      diamonds.create(200, 400, "diamond");
+      diamonds.create(600, 300, "diamond");
+      diamonds.create(1000, 500, "diamond");
 
-      // Configura el rebote de cada diamante
       diamonds.children.iterate(function (child) {
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
       });
 
-      // Añade colisiones entre los diamantes y las plataformas
       this.physics.add.collider(diamonds, platforms);
-
-      // Detecta cuando el jugador recoge un diamante
       this.physics.add.overlap(player, diamonds, collectDiamond, null, this);
 
-      // Muestra la puntuación en la pantalla
+      speedBoosts = this.physics.add.group();
+      speedBoosts.create(500, 300, "speedBoost");
+
+      this.physics.add.collider(speedBoosts, platforms);
+      this.physics.add.overlap(
+        player,
+        speedBoosts,
+        collectSpeedBoost,
+        null,
+        this
+      );
+
+      hearts = this.add.group({
+        key: "heart",
+        repeat: 2,
+        setXY: { x: 16, y: 16, stepX: 40 },
+      });
+
+      hearts.children.iterate(function (child) {
+        child.setScrollFactor(0);
+      });
+
       scoreText = this.add
-        .text(16, 16, "Score: 0", {
+        .text(16, 50, "Score: 0", {
           fontSize: "32px",
           fill: "#000",
         })
-        .setScrollFactor(0); // El texto de la puntuación permanece fijo en la pantalla
+        .setScrollFactor(0);
 
-      // Configura los controles del teclado
       cursors = this.input.keyboard.createCursorKeys();
+
+      baddies = this.physics.add.group();
+      const baddie = baddies.create(600, 500, "baddie");
+
+      baddie.setBounce(0);
+      baddie.setCollideWorldBounds(true);
+      baddie.setVelocity(Phaser.Math.Between(-100, 100), 20);
+
+      this.physics.add.collider(baddies, platforms);
+      this.physics.add.collider(player, baddies, hitbaddie, null, this);
     }
 
-    // Actualiza el estado del juego en cada frame
     function update() {
-      // Hace que el fondo se mueva con la cámara para dar la ilusión de desplazamiento
       background.tilePositionX = this.cameras.main.scrollX;
+      background.tilePositionY = this.cameras.main.scrollY;
 
-      // Maneja el movimiento del jugador basado en las teclas presionadas
       if (cursors.left.isDown) {
-        player.setVelocityX(-150); // Mueve el jugador hacia la izquierda
-        player.anims.play("left", true); // Reproduce la animación de caminar hacia la izquierda
+        player.setVelocityX(speedBoostActive ? -600 : -150);
+        player.anims.play("left", true);
       } else if (cursors.right.isDown) {
-        player.setVelocityX(150); // Mueve el jugador hacia la derecha
-        player.anims.play("right", true); // Reproduce la animación de caminar hacia la derecha
+        player.setVelocityX(speedBoostActive ? 600 : 150);
+        player.anims.play("right", true);
       } else {
-        player.setVelocityX(0); // Detiene el movimiento horizontal del jugador
-        player.anims.stop(); // Detiene la animación
-        player.setFrame(4); // Cambia a la posición neutral
+        player.setVelocityX(0);
+        player.anims.stop();
+        player.setFrame(4);
       }
 
-      // Permite que el jugador salte si está en el suelo
       if (cursors.up.isDown && player.body.touching.down) {
-        player.setVelocityY(-350); // Aplica una fuerza de salto
+        player.setVelocityY(-350);
       }
     }
 
-    // Función que se llama cuando el jugador recoge una estrella
     function collectStar(player, star) {
-      star.disableBody(true, true); // Desactiva la estrella recogida
-      score += 10; // Aumenta la puntuación
-      scoreText.setText("Score: " + score); // Actualiza el texto de la puntuación
+      star.disableBody(true, true);
+      score += 10;
+      scoreText.setText("Score: " + score);
     }
 
-    // Función que se llama cuando el jugador recoge un diamante
     function collectDiamond(player, diamond) {
-      diamond.disableBody(true, true); // Desactiva el diamante recogido
-      score += 50; // Aumenta la puntuación
-      scoreText.setText("Score: " + score); // Actualiza el texto de la puntuación
+      diamond.disableBody(true, true);
+      score += 50;
+      scoreText.setText("Score: " + score);
     }
 
-    // Limpia el juego cuando el componente se desmonta
+    function collectSpeedBoost(player, speedBoost) {
+      speedBoost.disableBody(true, true);
+      speedBoostActive = true;
+
+      this.time.delayedCall(
+        10000,
+        () => {
+          speedBoostActive = false;
+        },
+        [],
+        this
+      );
+    }
+
+    function hitbaddie(player, baddie) {
+      if (player.body.velocity.y > 0) {
+        baddie.disableBody(true, true);
+        score += 100;
+        scoreText.setText("Score: " + score);
+      } else {
+        loseLife();
+        player.setTint(0xff0000);
+
+        this.time.delayedCall(
+          500,
+          () => {
+            player.clearTint();
+          },
+          [],
+          this
+        );
+      }
+    }
+
+    function loseLife() {
+      lives--;
+      if (lives >= 0) {
+        hearts.getChildren()[lives].setVisible(false);
+      }
+
+      if (lives === 0) {
+        gameOver();
+      }
+    }
+
+    function gameOver() {
+      this.physics.pause();
+      player.setTint(0xff0000);
+      player.anims.play("turn");
+    }
+
     return () => {
       game.destroy(true);
     };
   }, []);
 
-  // Renderiza el contenedor del juego
   return (
     <div
       ref={gameContainer}
