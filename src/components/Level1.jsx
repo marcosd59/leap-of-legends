@@ -36,18 +36,21 @@ const Level1 = () => {
       this.load.image("star", "/assets/level1/star.png");
       this.load.image("diamond", "/assets/level1/diamond.png");
       this.load.image("speedBoost", "/assets/level1/velocidad.png");
+      this.load.image("heart", "/assets/level1/heart.png");
+      this.load.image("lifeKit", "/assets/level1/life.png");
+      this.load.image("jumpBoots", "/assets/level1/boots.png");
+      this.load.audio("hitSound", "/assets/level1/Hit.ogg");
+      this.load.audio("jumpSound", "/assets/level1/Jump.ogg");
+      this.load.audio("powerSound", "/assets/level1/Power.ogg");
       this.load.spritesheet("dude", "/assets/level1/dude.png", {
         frameWidth: 32,
         frameHeight: 48,
       });
-      this.load.image("heart", "/assets/level1/heart.png");
+
       this.load.spritesheet("baddie", "/assets/level1/baddie.png", {
         frameWidth: 32,
         frameHeight: 32,
       });
-
-      // COMENTADO POR AHORA
-      // this.load.audio("backgroundMusic", "/assets/level1/music.mp3");
     }
 
     let player;
@@ -60,6 +63,8 @@ const Level1 = () => {
     let scoreText;
     let background;
     let speedBoostActive = true;
+    let jumpBoostActive = false;
+    let isJumping = true;
     let hearts;
     let lives = 3;
     let baddies;
@@ -105,9 +110,23 @@ const Level1 = () => {
         repeat: -1,
       });
 
-      // Añadir y reproducir música de fondo
-      // const music = this.sound.add("backgroundMusic");
-      // music.play({ loop: true }); // Reproducir en bucle
+      const jumpBoots = this.physics.add.group();
+      jumpBoots.create(400, 500, "jumpBoots");
+      jumpBoots.create(1600, 350, "jumpBoots");
+      jumpBoots.create(2300, 200, "jumpBoots");
+
+      this.physics.add.collider(jumpBoots, platforms);
+      this.physics.add.overlap(player, jumpBoots, collectJumpBoots, null, this);
+
+      // Crear botiquines (life kits) en el mapa
+      const lifeKits = this.physics.add.group();
+      lifeKits.create(300, 500, "lifeKit");
+      lifeKits.create(1200, 350, "lifeKit");
+      lifeKits.create(2000, 300, "lifeKit");
+      lifeKits.create(2800, 150, "lifeKit");
+
+      this.physics.add.collider(lifeKits, platforms);
+      this.physics.add.overlap(player, lifeKits, collectLifeKit, null, this);
 
       stars = this.physics.add.group();
       stars.create(100, 300, "star");
@@ -164,15 +183,24 @@ const Level1 = () => {
 
       cursors = this.input.keyboard.createCursorKeys();
 
+      // Crear múltiples enemigos "baddie"
       baddies = this.physics.add.group();
-      const baddie = baddies.create(600, 500, "baddie");
+      const baddiePositions = [
+        { x: 600, y: 500 },
+        { x: 800, y: 300 },
+        { x: 1200, y: 400 },
+        { x: 1600, y: 350 },
+      ];
 
-      baddie.setBounce(0);
-      baddie.setCollideWorldBounds(true);
-      baddie.setVelocity(Phaser.Math.Between(-100, 100), 20);
+      baddiePositions.forEach((pos) => {
+        const baddie = baddies.create(pos.x, pos.y, "baddie");
+        baddie.setBounce(1);
+        baddie.setCollideWorldBounds(true);
+        baddie.setVelocity(Phaser.Math.Between(-100, 100), 20);
+      });
 
       this.physics.add.collider(baddies, platforms);
-      this.physics.add.collider(player, baddies, hitbaddie, null, this);
+      this.physics.add.collider(player, baddies, hitBaddie, null, this);
     }
 
     function update() {
@@ -191,9 +219,34 @@ const Level1 = () => {
         player.setFrame(4);
       }
 
-      if (cursors.up.isDown && player.body.touching.down) {
-        player.setVelocityY(-350);
+      if (cursors.up.isDown && player.body.touching.down && !isJumping) {
+        // Comienza un nuevo salto
+        player.setVelocityY(jumpBoostActive ? -600 : -350); // Saltar más alto si el potenciador está activo
+        this.sound.play("jumpSound"); // Reproducir sonido de salto
+        isJumping = true; // Marcar que el jugador está en el aire
       }
+
+      // Restablecer la bandera cuando el jugador toca el suelo
+      if (player.body.touching.down) {
+        isJumping = false;
+      }
+    }
+
+    function collectJumpBoots(player, boots) {
+      boots.disableBody(true, true);
+
+      // Activar el potenciador de salto más alto
+      jumpBoostActive = true;
+
+      // Temporizador para desactivar el efecto después de 10 segundos
+      this.time.delayedCall(
+        10000,
+        () => {
+          jumpBoostActive = false;
+        },
+        [],
+        this
+      );
     }
 
     function collectStar(player, star) {
@@ -212,6 +265,10 @@ const Level1 = () => {
       speedBoost.disableBody(true, true);
       speedBoostActive = true;
 
+      // Reproducir sonido de potencia
+      this.sound.play("powerSound");
+
+      // Temporizador para desactivar el efecto después de 10 segundos
       this.time.delayedCall(
         10000,
         () => {
@@ -222,11 +279,29 @@ const Level1 = () => {
       );
     }
 
-    function hitbaddie(player, baddie) {
-      if (player.body.velocity.y > 0) {
+    function collectLifeKit(player, lifeKit) {
+      lifeKit.disableBody(true, true);
+
+      // Incrementar vidas si el jugador tiene menos de 3
+      if (lives < 3) {
+        lives++;
+        hearts.getChildren()[lives - 1].setVisible(true); // Mostrar el corazón recuperado
+      }
+    }
+
+    function hitBaddie(player, baddie) {
+      if (
+        (player.body.velocity.y > 0 &&
+          baddie.body.touching.up &&
+          !baddie.body.touching.down) ||
+        (player.body.touching.down && baddie.body.touching.up)
+      ) {
         baddie.disableBody(true, true);
         score += 100;
         scoreText.setText("Score: " + score);
+        player.setVelocityY(-50);
+
+        this.sound.play("hitSound");
       } else {
         loseLife();
         player.setTint(0xff0000);
