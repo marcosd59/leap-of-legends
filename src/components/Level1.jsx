@@ -17,7 +17,7 @@ const Level1 = () => {
         default: "arcade",
         arcade: {
           gravity: { y: 300 },
-          debug: true,
+          debug: false,
         },
       },
       scene: {
@@ -63,10 +63,17 @@ const Level1 = () => {
         frameWidth: 32,
         frameHeight: 32,
       });
+
       this.load.spritesheet("duck", "/assets/level1/enemies/duck.png", {
         frameWidth: 36,
         frameHeight: 36,
       });
+
+      this.load.spritesheet("plant", "/assets/level1/enemies/plant.png", {
+        frameWidth: 44,
+        frameHeight: 42,
+      });
+      this.load.image("pea", "/assets/level1/enemies/pea.png");
     }
 
     let background;
@@ -86,6 +93,8 @@ const Level1 = () => {
 
     let baddies;
     let ducks;
+    let plants;
+    let peas;
 
     let speedBoostActive = true;
     let jumpBoostActive = false;
@@ -167,16 +176,6 @@ const Level1 = () => {
         this
       );
 
-      hearts = this.add.group({
-        key: "heart",
-        repeat: 2,
-        setXY: { x: 16, y: 16, stepX: 40 },
-      });
-
-      hearts.children.iterate(function (child) {
-        child.setScrollFactor(0);
-      });
-
       /**************************** ITEMS *****************************/
 
       diamonds = this.physics.add.group();
@@ -203,6 +202,8 @@ const Level1 = () => {
       this.physics.add.collider(stars, platforms);
       this.physics.add.overlap(player, stars, collectStar, null, this);
 
+      /**************************** SCORE *****************************/
+
       scoreText = this.add
         .text(16, 50, "Score: 0", {
           fontSize: "32px",
@@ -211,6 +212,18 @@ const Level1 = () => {
         .setScrollFactor(0);
 
       cursors = this.input.keyboard.createCursorKeys();
+
+      /**************************** LIVES *****************************/
+
+      hearts = this.add.group({
+        key: "heart",
+        repeat: 2,
+        setXY: { x: 16, y: 16, stepX: 40 },
+      });
+
+      hearts.children.iterate(function (child) {
+        child.setScrollFactor(0);
+      });
 
       /**************************** ENEMIES *****************************/
 
@@ -273,6 +286,39 @@ const Level1 = () => {
 
       this.physics.add.collider(ducks, platforms);
       this.physics.add.collider(player, ducks, hitDuck, null, this);
+
+      plants = this.physics.add.group();
+      peas = this.physics.add.group();
+
+      const plant1 = plants.create(1200, 700, "plant");
+      const plant2 = plants.create(1800, 650, "plant");
+
+      this.anims.create({
+        key: "plantIdle",
+        frames: this.anims.generateFrameNumbers("plant", { start: 0, end: 7 }),
+        frameRate: 5,
+        repeat: -1,
+      });
+
+      plants.children.iterate((plant) => {
+        plant.anims.play("plantIdle", true);
+      });
+
+      this.time.addEvent({
+        delay: 1300,
+        callback: () => shootPea(plant1),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: 1300,
+        callback: () => shootPea(plant2),
+        loop: true,
+      });
+
+      this.physics.add.collider(plants, platforms);
+      this.physics.add.overlap(player, peas, hitPea, null, this);
+      this.physics.add.collider(peas, platforms, destroyPea, null, this);
     }
 
     function update() {
@@ -307,6 +353,12 @@ const Level1 = () => {
         } else if (duck.body.blocked.left) {
           duck.setVelocityX(100);
           duck.flipX = false;
+        }
+      });
+
+      peas.getChildren().forEach((pea) => {
+        if (Math.abs(pea.x - pea.startX) >= 500) {
+          pea.destroy();
         }
       });
     }
@@ -421,6 +473,31 @@ const Level1 = () => {
       const newDirection = Phaser.Math.Between(0, 1) === 0 ? -100 : 100;
       duck.setVelocityX(newDirection);
       duck.flipX = newDirection > 0;
+    }
+
+    function shootPea(plant) {
+      const pea = peas.create(plant.x, plant.y, "pea");
+      pea.setVelocityX(-200);
+      pea.body.allowGravity = false;
+      pea.startX = pea.x;
+    }
+
+    function hitPea(player, pea) {
+      pea.destroy();
+      loseLife();
+      player.setTint(0xff0000);
+      this.time.delayedCall(
+        500,
+        () => {
+          player.clearTint();
+        },
+        [],
+        this
+      );
+    }
+
+    function destroyPea(pea) {
+      pea.destroy();
     }
 
     function loseLife() {
