@@ -38,6 +38,10 @@ const Level1 = () => {
       /******************** ITEMS *********************************/
       this.load.image("star", "/assets/level1/items/star.png");
       this.load.image("diamond", "/assets/level1/items/diamond.png");
+      this.load.spritesheet("apple", "/assets/level1/items/apple.png", {
+        frameWidth: 32,
+        frameHeight: 30,
+      });
 
       /******************** POWER-UPS *********************************/
       this.load.image("speedBoost", "/assets/level1/power-ups/velocidad.png");
@@ -91,6 +95,7 @@ const Level1 = () => {
 
     let stars;
     let diamonds;
+    let apples;
 
     let score = 0;
     let scoreText;
@@ -229,6 +234,30 @@ const Level1 = () => {
       this.physics.add.collider(stars, platforms);
       this.physics.add.overlap(player, stars, collectStar, null, this);
 
+      /* APPLES */
+
+      this.anims.create({
+        key: "appleSpin",
+        frames: this.anims.generateFrameNumbers("apple", { start: 0, end: 16 }),
+        frameRate: 16,
+        repeat: -1,
+      });
+
+      apples = this.physics.add.group();
+      apples = this.physics.add.group();
+
+      apples
+        .create(400, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(800, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+
+      this.physics.add.collider(apples, platforms);
+      this.physics.add.overlap(player, apples, collectApple, null, this);
+
       /**************************** SCORE *****************************/
 
       scoreText = this.add
@@ -267,6 +296,8 @@ const Level1 = () => {
         duck.setBounce(1);
         duck.setCollideWorldBounds(true);
         duck.setVelocity(Phaser.Math.Between(-100, 100), 20);
+
+        duck.flipX = duck.body.velocity.x < 0;
       });
 
       this.physics.add.collider(ducks, platforms);
@@ -278,7 +309,7 @@ const Level1 = () => {
           start: 0,
           end: 13,
         }),
-        frameRate: 10,
+        frameRate: 13,
         repeat: -1,
       });
 
@@ -414,6 +445,14 @@ const Level1 = () => {
         isJumping = true;
       }
 
+      ducks.children.iterate(function (duck) {
+        if (duck.body.velocity.x > 0) {
+          duck.flipX = true;
+        } else if (duck.body.velocity.x < 0) {
+          duck.flipX = false;
+        }
+      });
+
       if (player.body.touching.down) {
         isJumping = false;
       }
@@ -445,6 +484,12 @@ const Level1 = () => {
 
     function collectDiamond(player, diamond) {
       diamond.disableBody(true, true);
+      score += 50;
+      scoreText.setText("Score: " + score);
+    }
+
+    function collectApple(player, apple) {
+      apple.disableBody(true, true);
       score += 50;
       scoreText.setText("Score: " + score);
     }
