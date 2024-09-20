@@ -44,6 +44,8 @@ const Level1 = () => {
       this.load.image("heart", "/assets/level1/power-ups/heart.png");
       this.load.image("lifeKit", "/assets/level1/power-ups/life.png");
       this.load.image("jumpBoots", "/assets/level1/power-ups/boots.png");
+      this.load.image("pistol", "/assets/level1/power-ups/pistol.png");
+      this.load.image("bullet", "/assets/level1/enemies/pea.png");
 
       /******************** SOUNDS *********************************/
       this.load.audio("hitSound", "/assets/level1/songs/Hit.ogg");
@@ -81,20 +83,22 @@ const Level1 = () => {
       });
     }
 
-    let background;
+    let player;
 
+    let background;
     let platforms;
     let cursors;
+
     let stars;
     let diamonds;
-    let speedBoosts;
+
     let score = 0;
     let scoreText;
-
     let hearts;
     let lives = 3;
 
-    let player;
+    let speedBoosts;
+    let bullets;
 
     let ducks;
     let chickens;
@@ -104,17 +108,18 @@ const Level1 = () => {
 
     let speedBoostActive = true;
     let jumpBoostActive = false;
+    let lastDirection = "right";
     let isJumping = true;
 
     function create() {
       /**************************** BACKGROUND *****************************/
 
-      background = this.add.tileSprite(0, 0, 8000, 1800, "sky");
+      background = this.add.tileSprite(0, 0, 20000, 1800, "sky");
       background.setOrigin(0, 0);
       background.setScale(0.5);
 
-      this.cameras.main.setBounds(0, 0, 4000, 800);
-      this.physics.world.setBounds(0, 0, 4000, 800);
+      this.cameras.main.setBounds(0, 0, 8000, 800);
+      this.physics.world.setBounds(0, 0, 8000, 800);
 
       platforms = this.physics.add.staticGroup();
 
@@ -181,6 +186,22 @@ const Level1 = () => {
         null,
         this
       );
+
+      const pistols = this.physics.add.group();
+      pistols.create(300, 400, "pistol");
+      pistols.create(800, 400, "pistol");
+      pistols.create(2000, 300, "pistol");
+      pistols.create(3000, 200, "pistol");
+
+      bullets = this.physics.add.group({
+        defaultKey: "bullet",
+        maxSize: 20,
+        runChildUpdate: true,
+      });
+
+      this.physics.add.collider(pistols, platforms);
+      this.physics.add.overlap(player, pistols, collectPistol, null, this);
+      this.physics.add.collider(bullets, platforms, destroyBullet, null, this);
 
       /**************************** ITEMS *****************************/
 
@@ -343,15 +364,15 @@ const Level1 = () => {
 
       const camaelon1 = camaelons
         .create(1400, 400, "camaelon")
-        .setVelocityX(100)
+        .setVelocityX(200)
         .anims.play("camaelonWalk", true);
       const camaelon2 = camaelons
         .create(1900, 350, "camaelon")
-        .setVelocityX(100)
+        .setVelocityX(250)
         .anims.play("camaelonWalk", true);
 
       this.time.addEvent({
-        delay: Phaser.Math.Between(2000, 4000), // Cambiará de dirección en intervalos aleatorios
+        delay: Phaser.Math.Between(2000, 4000),
         callback: () => changeCamaelonDirection(camaelon1),
         loop: true,
       });
@@ -362,8 +383,12 @@ const Level1 = () => {
         loop: true,
       });
 
-      this.physics.add.collider(camaelons, platforms); // Colisión con las plataformas
+      this.physics.add.collider(camaelons, platforms);
       this.physics.add.collider(player, camaelons, hitCamaelon, null, this);
+
+      this.physics.add.overlap(bullets, ducks, killEnemy, null, this);
+      this.physics.add.overlap(bullets, chickens, killEnemy, null, this);
+      this.physics.add.overlap(bullets, camaelons, killEnemy, null, this);
     }
 
     function update() {
@@ -372,9 +397,11 @@ const Level1 = () => {
       if (cursors.left.isDown) {
         player.setVelocityX(speedBoostActive ? -600 : -150);
         player.anims.play("left", true);
+        lastDirection = "left";
       } else if (cursors.right.isDown) {
         player.setVelocityX(speedBoostActive ? 600 : 150);
         player.anims.play("right", true);
+        lastDirection = "right";
       } else {
         player.setVelocityX(0);
         player.anims.stop();
@@ -408,6 +435,8 @@ const Level1 = () => {
       });
     }
 
+    /* ITEMS */
+
     function collectStar(player, star) {
       star.disableBody(true, true);
       score += 10;
@@ -419,6 +448,8 @@ const Level1 = () => {
       score += 50;
       scoreText.setText("Score: " + score);
     }
+
+    /* POWER UPS */
 
     function collectSpeedBoost(player, speedBoost) {
       speedBoost.disableBody(true, true);
@@ -456,9 +487,69 @@ const Level1 = () => {
 
       if (lives < 3) {
         lives++;
-        hearts.getChildren()[lives - 1].setVisible(true);
+        if (lives > 0) {
+          hearts.getChildren()[lives - 1].setVisible(true);
+        }
       }
     }
+
+    function collectPistol(player, pistol) {
+      pistol.disableBody(true, true);
+
+      const bulletTimer = this.time.addEvent({
+        delay: 200,
+        callback: fireBullet,
+        callbackScope: this,
+        args: [player],
+        repeat: 24,
+      });
+
+      this.time.delayedCall(5000, () => {
+        bulletTimer.remove();
+      });
+    }
+
+    function fireBullet(player) {
+      const bullet = bullets.get(player.x, player.y, "bullet");
+
+      if (bullet) {
+        bullet.setActive(true);
+        bullet.setVisible(true);
+        bullet.body.allowGravity = false;
+
+        if (lastDirection === "right") {
+          bullet.setVelocityX(400);
+        } else if (lastDirection === "left") {
+          bullet.setVelocityX(-400);
+        }
+
+        this.time.delayedCall(600, () => {
+          if (bullet.active) {
+            bullet.destroy();
+          }
+        });
+      }
+    }
+
+    function destroyBullet(bullet) {
+      if (bullet.active) {
+        bullet.destroy();
+      }
+    }
+
+    function killEnemy(bullet, enemy) {
+      if (bullet.active) {
+        bullet.destroy();
+      }
+
+      enemy.disableBody(true, true);
+      score += 100;
+      scoreText.setText("Score: " + score);
+
+      this.sound.play("hitSound");
+    }
+
+    /* ENEMIES */
 
     function hitduck(player, duck) {
       if (
@@ -558,28 +649,27 @@ const Level1 = () => {
           !camaelon.body.touching.down) ||
         (player.body.touching.down && camaelon.body.touching.up)
       ) {
-        // Si el jugador está cayendo y toca la parte superior del camaleón
-        camaelon.disableBody(true, true); // Deshabilita y elimina al camaleón
-        score += 150; // Aumenta el puntaje al eliminar el camaleón
+        camaelon.disableBody(true, true);
+        score += 150;
         scoreText.setText("Score: " + score);
 
-        // Dar un impulso al jugador hacia arriba para simular un rebote
         player.setVelocityY(-300);
-        this.sound.play("hitSound"); // Reproduce el sonido de golpe
+        this.sound.play("hitSound");
       } else {
-        // Si el jugador no está cayendo sobre el camaleón, el jugador pierde una vida
         loseLife();
         player.setTint(0xff0000);
         this.time.delayedCall(
           500,
           () => {
-            player.clearTint(); // Elimina el tinte rojo después de 500 ms
+            player.clearTint();
           },
           [],
           this
         );
       }
     }
+
+    /* PLAYER */
 
     function loseLife() {
       lives--;
@@ -593,7 +683,7 @@ const Level1 = () => {
     }
 
     function gameOver() {
-      this.physics.pause();
+      // this.physics.pause();
       player.setTint(0xff0000);
       player.anims.play("turn");
     }
