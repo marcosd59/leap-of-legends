@@ -17,7 +17,7 @@ const Level1 = () => {
         default: "arcade",
         arcade: {
           gravity: { y: 300 },
-          debug: false,
+          debug: true,
         },
       },
       scene: {
@@ -59,14 +59,14 @@ const Level1 = () => {
 
       /******************** ENEMIES *********************************/
 
-      this.load.spritesheet("baddie", "/assets/level1/enemies/baddie.png", {
-        frameWidth: 32,
-        frameHeight: 32,
-      });
-
       this.load.spritesheet("duck", "/assets/level1/enemies/duck.png", {
         frameWidth: 36,
         frameHeight: 36,
+      });
+
+      this.load.spritesheet("chicken", "/assets/level1/enemies/chicken.png", {
+        frameWidth: 32,
+        frameHeight: 32,
       });
 
       this.load.spritesheet("plant", "/assets/level1/enemies/plant.png", {
@@ -74,6 +74,11 @@ const Level1 = () => {
         frameHeight: 42,
       });
       this.load.image("pea", "/assets/level1/enemies/pea.png");
+
+      this.load.spritesheet("camaelon", "/assets/level1/enemies/camaelon.png", {
+        frameWidth: 84,
+        frameHeight: 38,
+      });
     }
 
     let background;
@@ -91,10 +96,11 @@ const Level1 = () => {
 
     let player;
 
-    let baddies;
     let ducks;
+    let chickens;
     let plants;
     let peas;
+    let camaelons;
 
     let speedBoostActive = true;
     let jumpBoostActive = false;
@@ -227,65 +233,68 @@ const Level1 = () => {
 
       /**************************** ENEMIES *****************************/
 
-      baddies = this.physics.add.group();
-      const baddiePositions = [
+      ducks = this.physics.add.group();
+      const duckPositions = [
         { x: 600, y: 500 },
         { x: 800, y: 300 },
         { x: 1200, y: 400 },
         { x: 1600, y: 350 },
       ];
 
-      baddiePositions.forEach((pos) => {
-        const baddie = baddies.create(pos.x, pos.y, "baddie");
-        baddie.setBounce(1);
-        baddie.setCollideWorldBounds(true);
-        baddie.setVelocity(Phaser.Math.Between(-100, 100), 20);
+      duckPositions.forEach((pos) => {
+        const duck = ducks.create(pos.x, pos.y, "duck");
+        duck.setBounce(1);
+        duck.setCollideWorldBounds(true);
+        duck.setVelocity(Phaser.Math.Between(-100, 100), 20);
       });
 
-      this.physics.add.collider(baddies, platforms);
-      this.physics.add.collider(player, baddies, hitBaddie, null, this);
+      this.physics.add.collider(ducks, platforms);
+      this.physics.add.collider(player, ducks, hitduck, null, this);
 
       this.anims.create({
-        key: "duckWalk",
-        frames: this.anims.generateFrameNumbers("duck", { start: 0, end: 3 }),
+        key: "chickenWalk",
+        frames: this.anims.generateFrameNumbers("chicken", {
+          start: 0,
+          end: 13,
+        }),
         frameRate: 10,
         repeat: -1,
       });
 
-      ducks = this.physics.add.group();
-      const duck1 = ducks
-        .create(600, 500, "duck")
+      chickens = this.physics.add.group();
+      const chicken1 = chickens
+        .create(600, 500, "chicken")
         .setVelocityX(100)
-        .anims.play("duckWalk", true);
-      const duck2 = ducks
-        .create(1200, 400, "duck")
+        .anims.play("chickenWalk", true);
+      const chicken2 = chickens
+        .create(1200, 400, "chicken")
         .setVelocityX(100)
-        .anims.play("duckWalk", true);
-      const duck3 = ducks
-        .create(1800, 350, "duck")
+        .anims.play("chickenWalk", true);
+      const chicken3 = chickens
+        .create(1800, 350, "chicken")
         .setVelocityX(100)
-        .anims.play("duckWalk", true);
+        .anims.play("chickenWalk", true);
 
       this.time.addEvent({
         delay: Phaser.Math.Between(2000, 4000),
-        callback: () => changeDuckDirection(duck1),
+        callback: () => changechickenDirection(chicken1),
         loop: true,
       });
 
       this.time.addEvent({
         delay: Phaser.Math.Between(2000, 4000),
-        callback: () => changeDuckDirection(duck2),
+        callback: () => changechickenDirection(chicken2),
         loop: true,
       });
 
       this.time.addEvent({
         delay: Phaser.Math.Between(2000, 4000),
-        callback: () => changeDuckDirection(duck3),
+        callback: () => changechickenDirection(chicken3),
         loop: true,
       });
 
-      this.physics.add.collider(ducks, platforms);
-      this.physics.add.collider(player, ducks, hitDuck, null, this);
+      this.physics.add.collider(chickens, platforms);
+      this.physics.add.collider(player, chickens, hitchicken, null, this);
 
       plants = this.physics.add.group();
       peas = this.physics.add.group();
@@ -319,6 +328,42 @@ const Level1 = () => {
       this.physics.add.collider(plants, platforms);
       this.physics.add.overlap(player, peas, hitPea, null, this);
       this.physics.add.collider(peas, platforms, destroyPea, null, this);
+
+      this.anims.create({
+        key: "camaelonWalk",
+        frames: this.anims.generateFrameNumbers("camaelon", {
+          start: 0,
+          end: 9,
+        }),
+        frameRate: 25,
+        repeat: -1,
+      });
+
+      camaelons = this.physics.add.group();
+
+      const camaelon1 = camaelons
+        .create(1400, 400, "camaelon")
+        .setVelocityX(100)
+        .anims.play("camaelonWalk", true);
+      const camaelon2 = camaelons
+        .create(1900, 350, "camaelon")
+        .setVelocityX(100)
+        .anims.play("camaelonWalk", true);
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000), // Cambiará de dirección en intervalos aleatorios
+        callback: () => changeCamaelonDirection(camaelon1),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changeCamaelonDirection(camaelon2),
+        loop: true,
+      });
+
+      this.physics.add.collider(camaelons, platforms); // Colisión con las plataformas
+      this.physics.add.collider(player, camaelons, hitCamaelon, null, this);
     }
 
     function update() {
@@ -346,13 +391,13 @@ const Level1 = () => {
         isJumping = false;
       }
 
-      ducks.children.iterate(function (duck) {
-        if (duck.body.blocked.right) {
-          duck.setVelocityX(-100);
-          duck.flipX = true;
-        } else if (duck.body.blocked.left) {
-          duck.setVelocityX(100);
-          duck.flipX = false;
+      chickens.children.iterate(function (chicken) {
+        if (chicken.body.blocked.right) {
+          chicken.setVelocityX(-100);
+          chicken.flipX = true;
+        } else if (chicken.body.blocked.left) {
+          chicken.setVelocityX(100);
+          chicken.flipX = false;
         }
       });
 
@@ -415,14 +460,14 @@ const Level1 = () => {
       }
     }
 
-    function hitBaddie(player, baddie) {
+    function hitduck(player, duck) {
       if (
         (player.body.velocity.y > 0 &&
-          baddie.body.touching.up &&
-          !baddie.body.touching.down) ||
-        (player.body.touching.down && baddie.body.touching.up)
+          duck.body.touching.up &&
+          !duck.body.touching.down) ||
+        (player.body.touching.down && duck.body.touching.up)
       ) {
-        baddie.disableBody(true, true);
+        duck.disableBody(true, true);
         score += 100;
         scoreText.setText("Score: " + score);
         player.setVelocityY(-50);
@@ -443,14 +488,14 @@ const Level1 = () => {
       }
     }
 
-    function hitDuck(player, duck) {
+    function hitchicken(player, chicken) {
       if (
         (player.body.velocity.y > 0 &&
-          duck.body.touching.up &&
-          !duck.body.touching.down) ||
-        (player.body.touching.down && duck.body.touching.up)
+          chicken.body.touching.up &&
+          !chicken.body.touching.down) ||
+        (player.body.touching.down && chicken.body.touching.up)
       ) {
-        duck.disableBody(true, true);
+        chicken.disableBody(true, true);
         score += 100;
         scoreText.setText("Score: " + score);
         player.setVelocityY(-200);
@@ -469,10 +514,10 @@ const Level1 = () => {
       }
     }
 
-    function changeDuckDirection(duck) {
+    function changechickenDirection(chicken) {
       const newDirection = Phaser.Math.Between(0, 1) === 0 ? -100 : 100;
-      duck.setVelocityX(newDirection);
-      duck.flipX = newDirection > 0;
+      chicken.setVelocityX(newDirection);
+      chicken.flipX = newDirection > 0;
     }
 
     function shootPea(plant) {
@@ -498,6 +543,42 @@ const Level1 = () => {
 
     function destroyPea(pea) {
       pea.destroy();
+    }
+
+    function changeCamaelonDirection(camaelon) {
+      const newDirection = Phaser.Math.Between(0, 1) === 0 ? -100 : 100;
+      camaelon.setVelocityX(newDirection);
+      camaelon.flipX = newDirection > 0; // Girar el sprite según la dirección
+    }
+
+    function hitCamaelon(player, camaelon) {
+      if (
+        (player.body.velocity.y > 0 &&
+          camaelon.body.touching.up &&
+          !camaelon.body.touching.down) ||
+        (player.body.touching.down && camaelon.body.touching.up)
+      ) {
+        // Si el jugador está cayendo y toca la parte superior del camaleón
+        camaelon.disableBody(true, true); // Deshabilita y elimina al camaleón
+        score += 150; // Aumenta el puntaje al eliminar el camaleón
+        scoreText.setText("Score: " + score);
+
+        // Dar un impulso al jugador hacia arriba para simular un rebote
+        player.setVelocityY(-300);
+        this.sound.play("hitSound"); // Reproduce el sonido de golpe
+      } else {
+        // Si el jugador no está cayendo sobre el camaleón, el jugador pierde una vida
+        loseLife();
+        player.setTint(0xff0000);
+        this.time.delayedCall(
+          500,
+          () => {
+            player.clearTint(); // Elimina el tinte rojo después de 500 ms
+          },
+          [],
+          this
+        );
+      }
     }
 
     function loseLife() {
