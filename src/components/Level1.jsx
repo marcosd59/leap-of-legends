@@ -32,10 +32,12 @@ const Level1 = () => {
 
     function preload() {
       /******************** TERRENO *********************************/
+
       this.load.image("sky", "/assets/level1/terrain/sky.png");
       this.load.image("ground", "/assets/level1/terrain/platform.png");
 
       /******************** ITEMS *********************************/
+
       this.load.image("star", "/assets/level1/items/star.png");
       this.load.image("diamond", "/assets/level1/items/diamond.png");
       this.load.spritesheet("apple", "/assets/level1/items/apple.png", {
@@ -44,6 +46,7 @@ const Level1 = () => {
       });
 
       /******************** POWER-UPS *********************************/
+
       this.load.image("speedBoost", "/assets/level1/power-ups/velocidad.png");
       this.load.image("heart", "/assets/level1/power-ups/heart.png");
       this.load.image("lifeKit", "/assets/level1/power-ups/life.png");
@@ -52,9 +55,13 @@ const Level1 = () => {
       this.load.image("bullet", "/assets/level1/enemies/pea.png");
 
       /******************** SOUNDS *********************************/
+
+      this.load.audio("liveSound", "/assets/level1/songs/Live.ogg");
       this.load.audio("hitSound", "/assets/level1/songs/Hit.ogg");
       this.load.audio("jumpSound", "/assets/level1/songs/Jump.ogg");
-      this.load.audio("powerSound", "/assets/level1/songs/Power.ogg");
+      this.load.audio("speedSound", "/assets/level1/songs/Speed.ogg");
+      this.load.audio("bootsSound", "/assets/level1/songs/Boots.ogg");
+      this.load.audio("pistolSound", "/assets/level1/songs/Pistol.ogg");
 
       /******************** PLAYER *********************************/
 
@@ -111,9 +118,11 @@ const Level1 = () => {
     let peas;
     let camaelons;
 
+    let lastDirection = "right";
     let speedBoostActive = true;
     let jumpBoostActive = false;
-    let lastDirection = "right";
+    let isInvulnerable = false;
+    let nextLifeAt = 1000;
     let isJumping = true;
 
     function create() {
@@ -182,6 +191,8 @@ const Level1 = () => {
 
       speedBoosts = this.physics.add.group();
       speedBoosts.create(500, 300, "speedBoost");
+      speedBoosts.create(800, 200, "speedBoost");
+      speedBoosts.create(1300, 150, "speedBoost");
 
       this.physics.add.collider(speedBoosts, platforms);
       this.physics.add.overlap(
@@ -212,8 +223,14 @@ const Level1 = () => {
 
       diamonds = this.physics.add.group();
       diamonds.create(200, 400, "diamond");
+      diamonds.create(400, 400, "diamond");
       diamonds.create(600, 300, "diamond");
+      diamonds.create(800, 200, "diamond");
       diamonds.create(1000, 500, "diamond");
+      diamonds.create(1100, 400, "diamond");
+      diamonds.create(1200, 300, "diamond");
+      diamonds.create(1300, 200, "diamond");
+      diamonds.create(1400, 500, "diamond");
 
       diamonds.children.iterate(function (child) {
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
@@ -245,6 +262,8 @@ const Level1 = () => {
 
       apples = this.physics.add.group();
       apples = this.physics.add.group();
+      apples = this.physics.add.group();
+      apples = this.physics.add.group();
 
       apples
         .create(400, 300, "apple")
@@ -252,6 +271,14 @@ const Level1 = () => {
         .setScale(1);
       apples
         .create(800, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(1200, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(1600, 300, "apple")
         .anims.play("appleSpin", true)
         .setScale(1);
 
@@ -480,18 +507,33 @@ const Level1 = () => {
       star.disableBody(true, true);
       score += 10;
       scoreText.setText("Score: " + score);
+
+      if (score >= nextLifeAt) {
+        giveExtraLife(this);
+        nextLifeAt += 1000;
+      }
     }
 
     function collectDiamond(player, diamond) {
       diamond.disableBody(true, true);
-      score += 50;
+      score += 500;
       scoreText.setText("Score: " + score);
+
+      if (score >= nextLifeAt) {
+        giveExtraLife(this);
+        nextLifeAt += 1000;
+      }
     }
 
     function collectApple(player, apple) {
       apple.disableBody(true, true);
-      score += 50;
+      score += 500;
       scoreText.setText("Score: " + score);
+
+      if (score >= nextLifeAt) {
+        giveExtraLife(this);
+        nextLifeAt += 1000;
+      }
     }
 
     /* POWER UPS */
@@ -500,7 +542,7 @@ const Level1 = () => {
       speedBoost.disableBody(true, true);
       speedBoostActive = true;
 
-      this.sound.play("powerSound");
+      this.sound.play("speedSound", { volume: 0.2 });
 
       this.time.delayedCall(
         10000,
@@ -514,7 +556,7 @@ const Level1 = () => {
 
     function collectJumpBoots(player, boots) {
       boots.disableBody(true, true);
-
+      this.sound.play("bootsSound");
       jumpBoostActive = true;
 
       this.time.delayedCall(
@@ -529,7 +571,7 @@ const Level1 = () => {
 
     function collectLifeKit(player, lifeKit) {
       lifeKit.disableBody(true, true);
-
+      this.sound.play("liveSound");
       if (lives < 3) {
         lives++;
         if (lives > 0) {
@@ -540,7 +582,7 @@ const Level1 = () => {
 
     function collectPistol(player, pistol) {
       pistol.disableBody(true, true);
-
+      this.sound.play("pistolSound");
       const bulletTimer = this.time.addEvent({
         delay: 200,
         callback: fireBullet,
@@ -596,21 +638,25 @@ const Level1 = () => {
 
     /* ENEMIES */
 
-    function hitduck(player, duck) {
+    function hitchicken(player, chicken) {
       if (
         (player.body.velocity.y > 0 &&
-          duck.body.touching.up &&
-          !duck.body.touching.down) ||
-        (player.body.touching.down && duck.body.touching.up)
+          chicken.body.touching.up &&
+          !chicken.body.touching.down) ||
+        (player.body.touching.down && chicken.body.touching.up)
       ) {
-        duck.disableBody(true, true);
+        chicken.disableBody(true, true);
         score += 100;
         scoreText.setText("Score: " + score);
-        player.setVelocityY(-50);
-
+        player.setVelocityY(-200);
         this.sound.play("hitSound");
+
+        if (score >= nextLifeAt) {
+          giveExtraLife(this);
+          nextLifeAt += 1000;
+        }
       } else {
-        loseLife();
+        loseLife(this);
         player.setTint(0xff0000);
 
         this.time.delayedCall(
@@ -624,21 +670,27 @@ const Level1 = () => {
       }
     }
 
-    function hitchicken(player, chicken) {
+    function hitduck(player, duck) {
       if (
         (player.body.velocity.y > 0 &&
-          chicken.body.touching.up &&
-          !chicken.body.touching.down) ||
-        (player.body.touching.down && chicken.body.touching.up)
+          duck.body.touching.up &&
+          !duck.body.touching.down) ||
+        (player.body.touching.down && duck.body.touching.up)
       ) {
-        chicken.disableBody(true, true);
+        duck.disableBody(true, true);
         score += 100;
         scoreText.setText("Score: " + score);
-        player.setVelocityY(-200);
+        player.setVelocityY(-50);
         this.sound.play("hitSound");
+
+        if (score >= nextLifeAt) {
+          giveExtraLife(this);
+          nextLifeAt += 1000;
+        }
       } else {
-        loseLife();
+        loseLife(this);
         player.setTint(0xff0000);
+
         this.time.delayedCall(
           500,
           () => {
@@ -665,8 +717,9 @@ const Level1 = () => {
 
     function hitPea(player, pea) {
       pea.destroy();
-      loseLife();
+      loseLife(this);
       player.setTint(0xff0000);
+
       this.time.delayedCall(
         500,
         () => {
@@ -684,7 +737,7 @@ const Level1 = () => {
     function changeCamaelonDirection(camaelon) {
       const newDirection = Phaser.Math.Between(0, 1) === 0 ? -100 : 100;
       camaelon.setVelocityX(newDirection);
-      camaelon.flipX = newDirection > 0; // Girar el sprite según la dirección
+      camaelon.flipX = newDirection > 0;
     }
 
     function hitCamaelon(player, camaelon) {
@@ -697,12 +750,17 @@ const Level1 = () => {
         camaelon.disableBody(true, true);
         score += 150;
         scoreText.setText("Score: " + score);
-
         player.setVelocityY(-300);
         this.sound.play("hitSound");
+
+        if (score >= nextLifeAt) {
+          giveExtraLife(this);
+          nextLifeAt += 1000;
+        }
       } else {
-        loseLife();
+        loseLife(this);
         player.setTint(0xff0000);
+
         this.time.delayedCall(
           500,
           () => {
@@ -716,21 +774,102 @@ const Level1 = () => {
 
     /* PLAYER */
 
-    function loseLife() {
+    function loseLife(scene) {
+      if (isInvulnerable) return;
+
       lives--;
+      isInvulnerable = true;
+
       if (lives >= 0) {
         hearts.getChildren()[lives].setVisible(false);
       }
 
       if (lives === 0) {
-        gameOver();
+        gameOver.call(scene);
+      } else {
+        const blinkTimer = scene.time.addEvent({
+          delay: 100,
+          callback: () => {
+            player.visible = !player.visible;
+          },
+          repeat: 30,
+        });
+
+        scene.time.delayedCall(3000, () => {
+          isInvulnerable = false;
+          player.visible = true;
+          blinkTimer.remove();
+        });
+      }
+    }
+
+    function giveExtraLife(scene) {
+      if (lives < 3) {
+        lives++;
+        hearts.getChildren()[lives - 1].setVisible(true);
+        scene.sound.play("liveSound");
       }
     }
 
     function gameOver() {
-      // this.physics.pause();
+      this.physics.pause();
+
       player.setTint(0xff0000);
       player.anims.play("turn");
+
+      ducks.children.iterate(function (duck) {
+        duck.anims.stop();
+        duck.body.setVelocity(0);
+      });
+
+      chickens.children.iterate(function (chicken) {
+        chicken.anims.stop();
+        chicken.body.setVelocity(0);
+      });
+
+      camaelons.children.iterate(function (camaelon) {
+        camaelon.anims.stop();
+        camaelon.body.setVelocity(0);
+      });
+
+      this.input.keyboard.enabled = false;
+
+      const gameOverText = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY - 100,
+        "GAME OVER",
+        { fontSize: "64px", fill: "#fff" }
+      );
+      gameOverText.setOrigin(0.5, 0.5);
+
+      const restartButton = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY,
+        "Reiniciar Nivel",
+        { fontSize: "32px", fill: "#fff" }
+      );
+      restartButton.setOrigin(0.5, 0.5);
+      restartButton.setInteractive();
+      restartButton.on("pointerdown", () => {
+        this.scene.restart();
+        this.input.keyboard.enabled = true;
+      });
+
+      const exitButton = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY + 100,
+        "Salir",
+        { fontSize: "32px", fill: "#fff" }
+      );
+      exitButton.setOrigin(0.5, 0.5);
+      exitButton.setInteractive();
+      exitButton.on("pointerdown", () => {
+        window.location.href = "/";
+      });
+
+      gameOverText.setScrollFactor(0);
+      restartButton.setScrollFactor(0);
+      exitButton.setScrollFactor(0);
     }
 
     return () => {
