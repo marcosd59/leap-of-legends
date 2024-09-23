@@ -32,23 +32,36 @@ const Level1 = () => {
 
     function preload() {
       /******************** TERRENO *********************************/
+
       this.load.image("sky", "/assets/level1/terrain/sky.png");
       this.load.image("ground", "/assets/level1/terrain/platform.png");
 
       /******************** ITEMS *********************************/
+
       this.load.image("star", "/assets/level1/items/star.png");
       this.load.image("diamond", "/assets/level1/items/diamond.png");
+      this.load.spritesheet("apple", "/assets/level1/items/apple.png", {
+        frameWidth: 32,
+        frameHeight: 30,
+      });
 
       /******************** POWER-UPS *********************************/
+
       this.load.image("speedBoost", "/assets/level1/power-ups/velocidad.png");
       this.load.image("heart", "/assets/level1/power-ups/heart.png");
       this.load.image("lifeKit", "/assets/level1/power-ups/life.png");
       this.load.image("jumpBoots", "/assets/level1/power-ups/boots.png");
+      this.load.image("pistol", "/assets/level1/power-ups/pistol.png");
+      this.load.image("bullet", "/assets/level1/enemies/pea.png");
 
       /******************** SOUNDS *********************************/
+
+      this.load.audio("liveSound", "/assets/level1/songs/Live.ogg");
       this.load.audio("hitSound", "/assets/level1/songs/Hit.ogg");
       this.load.audio("jumpSound", "/assets/level1/songs/Jump.ogg");
-      this.load.audio("powerSound", "/assets/level1/songs/Power.ogg");
+      this.load.audio("speedSound", "/assets/level1/songs/Speed.ogg");
+      this.load.audio("bootsSound", "/assets/level1/songs/Boots.ogg");
+      this.load.audio("pistolSound", "/assets/level1/songs/Pistol.ogg");
 
       /******************** PLAYER *********************************/
 
@@ -59,47 +72,68 @@ const Level1 = () => {
 
       /******************** ENEMIES *********************************/
 
-      this.load.spritesheet("baddie", "/assets/level1/enemies/baddie.png", {
-        frameWidth: 32,
-        frameHeight: 32,
-      });
       this.load.spritesheet("duck", "/assets/level1/enemies/duck.png", {
         frameWidth: 36,
         frameHeight: 36,
       });
+
+      this.load.spritesheet("chicken", "/assets/level1/enemies/chicken.png", {
+        frameWidth: 32,
+        frameHeight: 32,
+      });
+
+      this.load.spritesheet("plant", "/assets/level1/enemies/plant.png", {
+        frameWidth: 44,
+        frameHeight: 42,
+      });
+      this.load.image("pea", "/assets/level1/enemies/pea.png");
+
+      this.load.spritesheet("camaelon", "/assets/level1/enemies/camaelon.png", {
+        frameWidth: 84,
+        frameHeight: 38,
+      });
     }
-
-    let background;
-
-    let platforms;
-    let cursors;
-    let stars;
-    let diamonds;
-    let speedBoosts;
-    let score = 0;
-    let scoreText;
-
-    let hearts;
-    let lives = 3;
 
     let player;
 
-    let baddies;
-    let ducks;
+    let background;
+    let platforms;
+    let cursors;
 
+    let stars;
+    let diamonds;
+    let apples;
+
+    let score = 0;
+    let scoreText;
+    let hearts;
+    let lives = 3;
+
+    let speedBoosts;
+    let bullets;
+
+    let ducks;
+    let chickens;
+    let plants;
+    let peas;
+    let camaelons;
+
+    let lastDirection = "right";
     let speedBoostActive = true;
     let jumpBoostActive = false;
+    let isInvulnerable = false;
+    let nextLifeAt = 1000;
     let isJumping = true;
 
     function create() {
       /**************************** BACKGROUND *****************************/
 
-      background = this.add.tileSprite(0, 0, 8000, 1800, "sky");
+      background = this.add.tileSprite(0, 0, 20000, 1800, "sky");
       background.setOrigin(0, 0);
       background.setScale(0.5);
 
-      this.cameras.main.setBounds(0, 0, 4000, 800);
-      this.physics.world.setBounds(0, 0, 4000, 800);
+      this.cameras.main.setBounds(0, 0, 8000, 800);
+      this.physics.world.setBounds(0, 0, 8000, 800);
 
       platforms = this.physics.add.staticGroup();
 
@@ -157,6 +191,8 @@ const Level1 = () => {
 
       speedBoosts = this.physics.add.group();
       speedBoosts.create(500, 300, "speedBoost");
+      speedBoosts.create(800, 200, "speedBoost");
+      speedBoosts.create(1300, 150, "speedBoost");
 
       this.physics.add.collider(speedBoosts, platforms);
       this.physics.add.overlap(
@@ -167,22 +203,34 @@ const Level1 = () => {
         this
       );
 
-      hearts = this.add.group({
-        key: "heart",
-        repeat: 2,
-        setXY: { x: 16, y: 16, stepX: 40 },
+      const pistols = this.physics.add.group();
+      pistols.create(300, 400, "pistol");
+      pistols.create(800, 400, "pistol");
+      pistols.create(2000, 300, "pistol");
+      pistols.create(3000, 200, "pistol");
+
+      bullets = this.physics.add.group({
+        defaultKey: "bullet",
+        maxSize: 20,
+        runChildUpdate: true,
       });
 
-      hearts.children.iterate(function (child) {
-        child.setScrollFactor(0);
-      });
+      this.physics.add.collider(pistols, platforms);
+      this.physics.add.overlap(player, pistols, collectPistol, null, this);
+      this.physics.add.collider(bullets, platforms, destroyBullet, null, this);
 
       /**************************** ITEMS *****************************/
 
       diamonds = this.physics.add.group();
       diamonds.create(200, 400, "diamond");
+      diamonds.create(400, 400, "diamond");
       diamonds.create(600, 300, "diamond");
+      diamonds.create(800, 200, "diamond");
       diamonds.create(1000, 500, "diamond");
+      diamonds.create(1100, 400, "diamond");
+      diamonds.create(1200, 300, "diamond");
+      diamonds.create(1300, 200, "diamond");
+      diamonds.create(1400, 500, "diamond");
 
       diamonds.children.iterate(function (child) {
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
@@ -203,6 +251,42 @@ const Level1 = () => {
       this.physics.add.collider(stars, platforms);
       this.physics.add.overlap(player, stars, collectStar, null, this);
 
+      /* APPLES */
+
+      this.anims.create({
+        key: "appleSpin",
+        frames: this.anims.generateFrameNumbers("apple", { start: 0, end: 16 }),
+        frameRate: 16,
+        repeat: -1,
+      });
+
+      apples = this.physics.add.group();
+      apples = this.physics.add.group();
+      apples = this.physics.add.group();
+      apples = this.physics.add.group();
+
+      apples
+        .create(400, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(800, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(1200, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(1600, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+
+      this.physics.add.collider(apples, platforms);
+      this.physics.add.overlap(player, apples, collectApple, null, this);
+
+      /**************************** SCORE *****************************/
+
       scoreText = this.add
         .text(16, 50, "Score: 0", {
           fontSize: "32px",
@@ -212,67 +296,157 @@ const Level1 = () => {
 
       cursors = this.input.keyboard.createCursorKeys();
 
+      /**************************** LIVES *****************************/
+
+      hearts = this.add.group({
+        key: "heart",
+        repeat: 2,
+        setXY: { x: 16, y: 16, stepX: 40 },
+      });
+
+      hearts.children.iterate(function (child) {
+        child.setScrollFactor(0);
+      });
+
       /**************************** ENEMIES *****************************/
 
-      baddies = this.physics.add.group();
-      const baddiePositions = [
+      ducks = this.physics.add.group();
+      const duckPositions = [
         { x: 600, y: 500 },
         { x: 800, y: 300 },
         { x: 1200, y: 400 },
         { x: 1600, y: 350 },
       ];
 
-      baddiePositions.forEach((pos) => {
-        const baddie = baddies.create(pos.x, pos.y, "baddie");
-        baddie.setBounce(1);
-        baddie.setCollideWorldBounds(true);
-        baddie.setVelocity(Phaser.Math.Between(-100, 100), 20);
-      });
+      duckPositions.forEach((pos) => {
+        const duck = ducks.create(pos.x, pos.y, "duck");
+        duck.setBounce(1);
+        duck.setCollideWorldBounds(true);
+        duck.setVelocity(Phaser.Math.Between(-100, 100), 20);
 
-      this.physics.add.collider(baddies, platforms);
-      this.physics.add.collider(player, baddies, hitBaddie, null, this);
-
-      this.anims.create({
-        key: "duckWalk",
-        frames: this.anims.generateFrameNumbers("duck", { start: 0, end: 3 }),
-        frameRate: 10,
-        repeat: -1,
-      });
-
-      ducks = this.physics.add.group();
-      const duck1 = ducks
-        .create(600, 500, "duck")
-        .setVelocityX(100)
-        .anims.play("duckWalk", true);
-      const duck2 = ducks
-        .create(1200, 400, "duck")
-        .setVelocityX(100)
-        .anims.play("duckWalk", true);
-      const duck3 = ducks
-        .create(1800, 350, "duck")
-        .setVelocityX(100)
-        .anims.play("duckWalk", true);
-
-      this.time.addEvent({
-        delay: Phaser.Math.Between(2000, 4000),
-        callback: () => changeDuckDirection(duck1),
-        loop: true,
-      });
-
-      this.time.addEvent({
-        delay: Phaser.Math.Between(2000, 4000),
-        callback: () => changeDuckDirection(duck2),
-        loop: true,
-      });
-
-      this.time.addEvent({
-        delay: Phaser.Math.Between(2000, 4000),
-        callback: () => changeDuckDirection(duck3),
-        loop: true,
+        duck.flipX = duck.body.velocity.x < 0;
       });
 
       this.physics.add.collider(ducks, platforms);
-      this.physics.add.collider(player, ducks, hitDuck, null, this);
+      this.physics.add.collider(player, ducks, hitduck, null, this);
+
+      this.anims.create({
+        key: "chickenWalk",
+        frames: this.anims.generateFrameNumbers("chicken", {
+          start: 0,
+          end: 13,
+        }),
+        frameRate: 13,
+        repeat: -1,
+      });
+
+      chickens = this.physics.add.group();
+      const chicken1 = chickens
+        .create(600, 500, "chicken")
+        .setVelocityX(100)
+        .anims.play("chickenWalk", true);
+      const chicken2 = chickens
+        .create(1200, 400, "chicken")
+        .setVelocityX(100)
+        .anims.play("chickenWalk", true);
+      const chicken3 = chickens
+        .create(1800, 350, "chicken")
+        .setVelocityX(100)
+        .anims.play("chickenWalk", true);
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changechickenDirection(chicken1),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changechickenDirection(chicken2),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changechickenDirection(chicken3),
+        loop: true,
+      });
+
+      this.physics.add.collider(chickens, platforms);
+      this.physics.add.collider(player, chickens, hitchicken, null, this);
+
+      plants = this.physics.add.group();
+      peas = this.physics.add.group();
+
+      const plant1 = plants.create(1200, 700, "plant");
+      const plant2 = plants.create(1800, 650, "plant");
+
+      this.anims.create({
+        key: "plantIdle",
+        frames: this.anims.generateFrameNumbers("plant", { start: 0, end: 7 }),
+        frameRate: 5,
+        repeat: -1,
+      });
+
+      plants.children.iterate((plant) => {
+        plant.anims.play("plantIdle", true);
+      });
+
+      this.time.addEvent({
+        delay: 1300,
+        callback: () => shootPea(plant1),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: 1300,
+        callback: () => shootPea(plant2),
+        loop: true,
+      });
+
+      this.physics.add.collider(plants, platforms);
+      this.physics.add.overlap(player, peas, hitPea, null, this);
+      this.physics.add.collider(peas, platforms, destroyPea, null, this);
+
+      this.anims.create({
+        key: "camaelonWalk",
+        frames: this.anims.generateFrameNumbers("camaelon", {
+          start: 0,
+          end: 9,
+        }),
+        frameRate: 25,
+        repeat: -1,
+      });
+
+      camaelons = this.physics.add.group();
+
+      const camaelon1 = camaelons
+        .create(1400, 400, "camaelon")
+        .setVelocityX(200)
+        .anims.play("camaelonWalk", true);
+      const camaelon2 = camaelons
+        .create(1900, 350, "camaelon")
+        .setVelocityX(250)
+        .anims.play("camaelonWalk", true);
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changeCamaelonDirection(camaelon1),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changeCamaelonDirection(camaelon2),
+        loop: true,
+      });
+
+      this.physics.add.collider(camaelons, platforms);
+      this.physics.add.collider(player, camaelons, hitCamaelon, null, this);
+
+      this.physics.add.overlap(bullets, ducks, killEnemy, null, this);
+      this.physics.add.overlap(bullets, chickens, killEnemy, null, this);
+      this.physics.add.overlap(bullets, camaelons, killEnemy, null, this);
     }
 
     function update() {
@@ -281,9 +455,11 @@ const Level1 = () => {
       if (cursors.left.isDown) {
         player.setVelocityX(speedBoostActive ? -600 : -150);
         player.anims.play("left", true);
+        lastDirection = "left";
       } else if (cursors.right.isDown) {
         player.setVelocityX(speedBoostActive ? 600 : 150);
         player.anims.play("right", true);
+        lastDirection = "right";
       } else {
         player.setVelocityX(0);
         player.anims.stop();
@@ -296,38 +472,77 @@ const Level1 = () => {
         isJumping = true;
       }
 
+      ducks.children.iterate(function (duck) {
+        if (duck.body.velocity.x > 0) {
+          duck.flipX = true;
+        } else if (duck.body.velocity.x < 0) {
+          duck.flipX = false;
+        }
+      });
+
       if (player.body.touching.down) {
         isJumping = false;
       }
 
-      ducks.children.iterate(function (duck) {
-        if (duck.body.blocked.right) {
-          duck.setVelocityX(-100);
-          duck.flipX = true;
-        } else if (duck.body.blocked.left) {
-          duck.setVelocityX(100);
-          duck.flipX = false;
+      chickens.children.iterate(function (chicken) {
+        if (chicken.body.blocked.right) {
+          chicken.setVelocityX(-100);
+          chicken.flipX = true;
+        } else if (chicken.body.blocked.left) {
+          chicken.setVelocityX(100);
+          chicken.flipX = false;
+        }
+      });
+
+      peas.getChildren().forEach((pea) => {
+        if (Math.abs(pea.x - pea.startX) >= 500) {
+          pea.destroy();
         }
       });
     }
+
+    /* ITEMS */
 
     function collectStar(player, star) {
       star.disableBody(true, true);
       score += 10;
       scoreText.setText("Score: " + score);
+
+      if (score >= nextLifeAt) {
+        giveExtraLife(this);
+        nextLifeAt += 1000;
+      }
     }
 
     function collectDiamond(player, diamond) {
       diamond.disableBody(true, true);
-      score += 50;
+      score += 500;
       scoreText.setText("Score: " + score);
+
+      if (score >= nextLifeAt) {
+        giveExtraLife(this);
+        nextLifeAt += 1000;
+      }
     }
+
+    function collectApple(player, apple) {
+      apple.disableBody(true, true);
+      score += 500;
+      scoreText.setText("Score: " + score);
+
+      if (score >= nextLifeAt) {
+        giveExtraLife(this);
+        nextLifeAt += 1000;
+      }
+    }
+
+    /* POWER UPS */
 
     function collectSpeedBoost(player, speedBoost) {
       speedBoost.disableBody(true, true);
       speedBoostActive = true;
 
-      this.sound.play("powerSound");
+      this.sound.play("speedSound", { volume: 0.2 });
 
       this.time.delayedCall(
         10000,
@@ -341,7 +556,7 @@ const Level1 = () => {
 
     function collectJumpBoots(player, boots) {
       boots.disableBody(true, true);
-
+      this.sound.play("bootsSound");
       jumpBoostActive = true;
 
       this.time.delayedCall(
@@ -356,28 +571,92 @@ const Level1 = () => {
 
     function collectLifeKit(player, lifeKit) {
       lifeKit.disableBody(true, true);
-
+      this.sound.play("liveSound");
       if (lives < 3) {
         lives++;
-        hearts.getChildren()[lives - 1].setVisible(true);
+        if (lives > 0) {
+          hearts.getChildren()[lives - 1].setVisible(true);
+        }
       }
     }
 
-    function hitBaddie(player, baddie) {
+    function collectPistol(player, pistol) {
+      pistol.disableBody(true, true);
+      this.sound.play("pistolSound");
+      const bulletTimer = this.time.addEvent({
+        delay: 200,
+        callback: fireBullet,
+        callbackScope: this,
+        args: [player],
+        repeat: 24,
+      });
+
+      this.time.delayedCall(5000, () => {
+        bulletTimer.remove();
+      });
+    }
+
+    function fireBullet(player) {
+      const bullet = bullets.get(player.x, player.y, "bullet");
+
+      if (bullet) {
+        bullet.setActive(true);
+        bullet.setVisible(true);
+        bullet.body.allowGravity = false;
+
+        if (lastDirection === "right") {
+          bullet.setVelocityX(400);
+        } else if (lastDirection === "left") {
+          bullet.setVelocityX(-400);
+        }
+
+        this.time.delayedCall(600, () => {
+          if (bullet.active) {
+            bullet.destroy();
+          }
+        });
+      }
+    }
+
+    function destroyBullet(bullet) {
+      if (bullet.active) {
+        bullet.destroy();
+      }
+    }
+
+    function killEnemy(bullet, enemy) {
+      if (bullet.active) {
+        bullet.destroy();
+      }
+
+      enemy.disableBody(true, true);
+      score += 100;
+      scoreText.setText("Score: " + score);
+
+      this.sound.play("hitSound");
+    }
+
+    /* ENEMIES */
+
+    function hitchicken(player, chicken) {
       if (
         (player.body.velocity.y > 0 &&
-          baddie.body.touching.up &&
-          !baddie.body.touching.down) ||
-        (player.body.touching.down && baddie.body.touching.up)
+          chicken.body.touching.up &&
+          !chicken.body.touching.down) ||
+        (player.body.touching.down && chicken.body.touching.up)
       ) {
-        baddie.disableBody(true, true);
+        chicken.disableBody(true, true);
         score += 100;
         scoreText.setText("Score: " + score);
-        player.setVelocityY(-50);
-
+        player.setVelocityY(-200);
         this.sound.play("hitSound");
+
+        if (score >= nextLifeAt) {
+          giveExtraLife(this);
+          nextLifeAt += 1000;
+        }
       } else {
-        loseLife();
+        loseLife(this);
         player.setTint(0xff0000);
 
         this.time.delayedCall(
@@ -391,7 +670,7 @@ const Level1 = () => {
       }
     }
 
-    function hitDuck(player, duck) {
+    function hitduck(player, duck) {
       if (
         (player.body.velocity.y > 0 &&
           duck.body.touching.up &&
@@ -401,11 +680,17 @@ const Level1 = () => {
         duck.disableBody(true, true);
         score += 100;
         scoreText.setText("Score: " + score);
-        player.setVelocityY(-200);
+        player.setVelocityY(-50);
         this.sound.play("hitSound");
+
+        if (score >= nextLifeAt) {
+          giveExtraLife(this);
+          nextLifeAt += 1000;
+        }
       } else {
-        loseLife();
+        loseLife(this);
         player.setTint(0xff0000);
+
         this.time.delayedCall(
           500,
           () => {
@@ -417,27 +702,174 @@ const Level1 = () => {
       }
     }
 
-    function changeDuckDirection(duck) {
+    function changechickenDirection(chicken) {
       const newDirection = Phaser.Math.Between(0, 1) === 0 ? -100 : 100;
-      duck.setVelocityX(newDirection);
-      duck.flipX = newDirection > 0;
+      chicken.setVelocityX(newDirection);
+      chicken.flipX = newDirection > 0;
     }
 
-    function loseLife() {
+    function shootPea(plant) {
+      const pea = peas.create(plant.x, plant.y, "pea");
+      pea.setVelocityX(-200);
+      pea.body.allowGravity = false;
+      pea.startX = pea.x;
+    }
+
+    function hitPea(player, pea) {
+      pea.destroy();
+      loseLife(this);
+      player.setTint(0xff0000);
+
+      this.time.delayedCall(
+        500,
+        () => {
+          player.clearTint();
+        },
+        [],
+        this
+      );
+    }
+
+    function destroyPea(pea) {
+      pea.destroy();
+    }
+
+    function changeCamaelonDirection(camaelon) {
+      const newDirection = Phaser.Math.Between(0, 1) === 0 ? -100 : 100;
+      camaelon.setVelocityX(newDirection);
+      camaelon.flipX = newDirection > 0;
+    }
+
+    function hitCamaelon(player, camaelon) {
+      if (
+        (player.body.velocity.y > 0 &&
+          camaelon.body.touching.up &&
+          !camaelon.body.touching.down) ||
+        (player.body.touching.down && camaelon.body.touching.up)
+      ) {
+        camaelon.disableBody(true, true);
+        score += 150;
+        scoreText.setText("Score: " + score);
+        player.setVelocityY(-300);
+        this.sound.play("hitSound");
+
+        if (score >= nextLifeAt) {
+          giveExtraLife(this);
+          nextLifeAt += 1000;
+        }
+      } else {
+        loseLife(this);
+        player.setTint(0xff0000);
+
+        this.time.delayedCall(
+          500,
+          () => {
+            player.clearTint();
+          },
+          [],
+          this
+        );
+      }
+    }
+
+    /* PLAYER */
+
+    function loseLife(scene) {
+      if (isInvulnerable) return;
+
       lives--;
+      isInvulnerable = true;
+
       if (lives >= 0) {
         hearts.getChildren()[lives].setVisible(false);
       }
 
       if (lives === 0) {
-        gameOver();
+        gameOver.call(scene);
+      } else {
+        const blinkTimer = scene.time.addEvent({
+          delay: 100,
+          callback: () => {
+            player.visible = !player.visible;
+          },
+          repeat: 30,
+        });
+
+        scene.time.delayedCall(3000, () => {
+          isInvulnerable = false;
+          player.visible = true;
+          blinkTimer.remove();
+        });
+      }
+    }
+
+    function giveExtraLife(scene) {
+      if (lives < 3) {
+        lives++;
+        hearts.getChildren()[lives - 1].setVisible(true);
+        scene.sound.play("liveSound");
       }
     }
 
     function gameOver() {
       this.physics.pause();
+
       player.setTint(0xff0000);
       player.anims.play("turn");
+
+      ducks.children.iterate(function (duck) {
+        duck.anims.stop();
+        duck.body.setVelocity(0);
+      });
+
+      chickens.children.iterate(function (chicken) {
+        chicken.anims.stop();
+        chicken.body.setVelocity(0);
+      });
+
+      camaelons.children.iterate(function (camaelon) {
+        camaelon.anims.stop();
+        camaelon.body.setVelocity(0);
+      });
+
+      this.input.keyboard.enabled = false;
+
+      const gameOverText = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY - 100,
+        "GAME OVER",
+        { fontSize: "64px", fill: "#fff" }
+      );
+      gameOverText.setOrigin(0.5, 0.5);
+
+      const restartButton = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY,
+        "Reiniciar Nivel",
+        { fontSize: "32px", fill: "#fff" }
+      );
+      restartButton.setOrigin(0.5, 0.5);
+      restartButton.setInteractive();
+      restartButton.on("pointerdown", () => {
+        this.scene.restart();
+        this.input.keyboard.enabled = true;
+      });
+
+      const exitButton = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY + 100,
+        "Salir",
+        { fontSize: "32px", fill: "#fff" }
+      );
+      exitButton.setOrigin(0.5, 0.5);
+      exitButton.setInteractive();
+      exitButton.on("pointerdown", () => {
+        window.location.href = "/";
+      });
+
+      gameOverText.setScrollFactor(0);
+      restartButton.setScrollFactor(0);
+      exitButton.setScrollFactor(0);
     }
 
     return () => {

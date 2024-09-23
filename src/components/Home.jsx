@@ -1,6 +1,14 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 
 const Home = () => {
+  useEffect(() => {
+    document.body.style.backgroundColor = "#0e0e2";
+    return () => {
+      document.body.style.backgroundColor = "";
+    };
+  }, []);
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Leap of Legends</h1>
@@ -31,9 +39,11 @@ const styles = {
     textAlign: "center",
     marginTop: "100px",
     padding: "25px",
-    backgroundColor: "#f0f0f0",
+    backgroundImage: "url('../public/assets/menu/bg.png')",
+    backgroundPosition: "center",
     borderRadius: "20px",
     width: "100%",
+    height: "auto",
     margin: "auto",
     boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
   },
