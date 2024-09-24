@@ -17,7 +17,7 @@ const Level1 = () => {
         default: "arcade",
         arcade: {
           gravity: { y: 300 },
-          debug: true,
+          debug: false,
         },
       },
       scene: {
@@ -310,6 +310,8 @@ const Level1 = () => {
 
       /**************************** ENEMIES *****************************/
 
+      // -------------> DUCKS <------------- //
+
       ducks = this.physics.add.group();
       const duckPositions = [
         { x: 600, y: 500 },
@@ -516,7 +518,7 @@ const Level1 = () => {
 
     function collectDiamond(player, diamond) {
       diamond.disableBody(true, true);
-      score += 500;
+      score += 50;
       scoreText.setText("Score: " + score);
 
       if (score >= nextLifeAt) {
@@ -527,7 +529,7 @@ const Level1 = () => {
 
     function collectApple(player, apple) {
       apple.disableBody(true, true);
-      score += 500;
+      score += 30;
       scoreText.setText("Score: " + score);
 
       if (score >= nextLifeAt) {
@@ -646,7 +648,7 @@ const Level1 = () => {
         (player.body.touching.down && chicken.body.touching.up)
       ) {
         chicken.disableBody(true, true);
-        score += 100;
+        score += 20;
         scoreText.setText("Score: " + score);
         player.setVelocityY(-200);
         this.sound.play("hitSound");
@@ -678,7 +680,7 @@ const Level1 = () => {
         (player.body.touching.down && duck.body.touching.up)
       ) {
         duck.disableBody(true, true);
-        score += 100;
+        score += 20;
         scoreText.setText("Score: " + score);
         player.setVelocityY(-50);
         this.sound.play("hitSound");
@@ -748,7 +750,7 @@ const Level1 = () => {
         (player.body.touching.down && camaelon.body.touching.up)
       ) {
         camaelon.disableBody(true, true);
-        score += 150;
+        score += 20;
         scoreText.setText("Score: " + score);
         player.setVelocityY(-300);
         this.sound.play("hitSound");
