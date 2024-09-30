@@ -51,6 +51,6 @@ Si deseas contribuir a este proyecto:
 
 Si tienes alguna pregunta o sugerencia, no dudes en abrir un issue o contactar al desarrollador:
 
-- **Nombre**: Marcos Damián Pool Canul
+- **Nombre**: Marcos D. Pool
 - **Correo electrónico**: <damian.marcospool@gmail.com>
 - **GitHub**: [marcosd59](https://github.com/marcosd59)
