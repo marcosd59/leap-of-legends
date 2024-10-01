@@ -39,7 +39,7 @@ const styles = {
     textAlign: "center",
     marginTop: "100px",
     padding: "25px",
-    backgroundImage: "url('../public/assets/menu/bg.png')",
+    // backgroundImage: "url('../public/assets/menu/bg.png')",
     backgroundPosition: "center",
     borderRadius: "20px",
     width: "100%",
