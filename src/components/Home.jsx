@@ -1,13 +1,19 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const Home = () => {
-  useEffect(() => {
+  const audioRef = useRef(null);
 
-    document.body.style.backgroundImage = 'url("../../public/assets/menu/background.jpg")';
+  useEffect(() => {
+    document.body.style.backgroundImage =
+      'url("../../public/assets/menu/background.jpg")';
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
+
+    if (audioRef.current) {
+      audioRef.current.volume = 0.1;
+    }
 
     return () => {
       document.body.style.backgroundImage = "";
@@ -16,7 +22,7 @@ const Home = () => {
 
   return (
     <div style={styles.container}>
-      <audio autoPlay loop>
+      <audio ref={audioRef} autoPlay loop>
         <source src="../../public/assets/menu/intro.ogg" type="audio/ogg" />
         Tu navegador no soporta el elemento de audio.
       </audio>
