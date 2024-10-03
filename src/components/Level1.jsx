@@ -35,6 +35,7 @@ const Level1 = () => {
 
       this.load.image("sky", "/assets/level1/terrain/sky.png");
       this.load.image("ground", "/assets/level1/terrain/platform.png");
+      this.load.image("goal", "/assets/level1/terrain/end.png");
 
       /******************** ITEMS *********************************/
 
@@ -52,7 +53,7 @@ const Level1 = () => {
       this.load.image("lifeKit", "/assets/level1/power-ups/life.png");
       this.load.image("jumpBoots", "/assets/level1/power-ups/boots.png");
       this.load.image("pistol", "/assets/level1/power-ups/pistol.png");
-      this.load.image("bullet", "/assets/level1/enemies/pea.png");
+      this.load.image("bullet", "/assets/level1/power-ups/bullet.png");
 
       /******************** SOUNDS *********************************/
 
@@ -119,7 +120,7 @@ const Level1 = () => {
     let camaelons;
 
     let lastDirection = "right";
-    let speedBoostActive = true;
+    let speedBoostActive = false;
     let jumpBoostActive = false;
     let isInvulnerable = false;
     let nextLifeAt = 1000;
@@ -127,8 +128,7 @@ const Level1 = () => {
 
     function create() {
       /**************************** BACKGROUND *****************************/
-
-      background = this.add.tileSprite(0, 0, 20000, 1800, "sky");
+      background = this.add.tileSprite(0, 0, 20000, 2800, "sky");
       background.setOrigin(0, 0);
       background.setScale(0.5);
 
@@ -140,15 +140,7 @@ const Level1 = () => {
       const ground = platforms.create(0, this.scale.height - 32, "ground");
       ground.setScale(60, 2).refreshBody();
 
-      platforms.create(500, 600, "ground").refreshBody();
-      platforms.create(-150, 450, "ground").refreshBody();
-      platforms.create(850, 350, "ground").refreshBody();
-      platforms.create(100, 200, "ground").refreshBody();
-      platforms.create(1500, 400, "ground").refreshBody();
-      platforms.create(2500, 250, "ground").refreshBody();
-
       /**************************** PLAYER *****************************/
-
       player = this.physics.add.sprite(32, this.scale.height - 150, "dude");
       player.setBounce(0.2);
       player.setCollideWorldBounds(true);
@@ -170,29 +162,48 @@ const Level1 = () => {
         repeat: -1,
       });
 
+      /**************************** META *****************************/
+
+      this.goal = this.physics.add.sprite(7900, 705, "goal");
+      this.goal.body.allowGravity = false;
+
+      this.physics.add.collider(this.goal, platforms);
+      this.physics.add.overlap(player, this.goal, reachGoal, null, this);
+
+      /**************************** PLATAFORMAS *****************************/
+      platforms.create(500, 600, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(1500, 600, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(2000, 400, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(2700, 200, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(2400, 600, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(3000, 400, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(3500, 600, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(4500, 550, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(5000, 600, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(5500, 400, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(6000, 300, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(6700, 200, "ground").setScale(0.8, 0.8).refreshBody();
+      platforms.create(7200, 600, "ground").setScale(0.8, 0.8).refreshBody();
+
       /**************************** POWER UPS *****************************/
 
       const jumpBoots = this.physics.add.group();
-      jumpBoots.create(400, 500, "jumpBoots");
-      jumpBoots.create(1600, 350, "jumpBoots");
-      jumpBoots.create(2300, 200, "jumpBoots");
+      jumpBoots.create(2700, 600, "jumpBoots");
+      jumpBoots.create(5500, 550, "jumpBoots");
 
       this.physics.add.collider(jumpBoots, platforms);
       this.physics.add.overlap(player, jumpBoots, collectJumpBoots, null, this);
 
       const lifeKits = this.physics.add.group();
-      lifeKits.create(300, 500, "lifeKit");
-      lifeKits.create(1200, 350, "lifeKit");
-      lifeKits.create(2000, 300, "lifeKit");
-      lifeKits.create(2800, 150, "lifeKit");
+      lifeKits.create(1800, 500, "lifeKit");
+      lifeKits.create(4000, 800, "lifeKit");
+      lifeKits.create(6000, 500, "lifeKit");
 
       this.physics.add.collider(lifeKits, platforms);
       this.physics.add.overlap(player, lifeKits, collectLifeKit, null, this);
 
       speedBoosts = this.physics.add.group();
-      speedBoosts.create(500, 300, "speedBoost");
-      speedBoosts.create(800, 200, "speedBoost");
-      speedBoosts.create(1300, 150, "speedBoost");
+      speedBoosts.create(3500, 600, "speedBoost");
 
       this.physics.add.collider(speedBoosts, platforms);
       this.physics.add.overlap(
@@ -204,10 +215,8 @@ const Level1 = () => {
       );
 
       const pistols = this.physics.add.group();
-      pistols.create(300, 400, "pistol");
-      pistols.create(800, 400, "pistol");
-      pistols.create(2000, 300, "pistol");
-      pistols.create(3000, 200, "pistol");
+      pistols.create(2300, 700, "pistol");
+      pistols.create(5000, 700, "pistol");
 
       bullets = this.physics.add.group({
         defaultKey: "bullet",
@@ -222,15 +231,16 @@ const Level1 = () => {
       /**************************** ITEMS *****************************/
 
       diamonds = this.physics.add.group();
-      diamonds.create(200, 400, "diamond");
-      diamonds.create(400, 400, "diamond");
-      diamonds.create(600, 300, "diamond");
-      diamonds.create(800, 200, "diamond");
-      diamonds.create(1000, 500, "diamond");
-      diamonds.create(1100, 400, "diamond");
-      diamonds.create(1200, 300, "diamond");
-      diamonds.create(1300, 200, "diamond");
-      diamonds.create(1400, 500, "diamond");
+      diamonds.create(2600, 110, "diamond");
+      diamonds.create(2650, 100, "diamond");
+      diamonds.create(2700, 110, "diamond");
+      diamonds.create(2750, 100, "diamond");
+      diamonds.create(2800, 110, "diamond");
+      diamonds.create(6600, 110, "diamond");
+      diamonds.create(6650, 100, "diamond");
+      diamonds.create(6700, 110, "diamond");
+      diamonds.create(6750, 100, "diamond");
+      diamonds.create(6800, 110, "diamond");
 
       diamonds.children.iterate(function (child) {
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
@@ -240,9 +250,31 @@ const Level1 = () => {
       this.physics.add.overlap(player, diamonds, collectDiamond, null, this);
 
       stars = this.physics.add.group();
-      stars.create(100, 300, "star");
-      stars.create(400, 500, "star");
-      stars.create(700, 200, "star");
+      stars.create(400, 410, "star");
+      stars.create(450, 400, "star");
+      stars.create(500, 410, "star");
+      stars.create(550, 400, "star");
+      stars.create(600, 410, "star");
+      stars.create(1400, 310, "star");
+      stars.create(1450, 300, "star");
+      stars.create(1500, 310, "star");
+      stars.create(1550, 300, "star");
+      stars.create(1600, 310, "star");
+      stars.create(1900, 210, "star");
+      stars.create(1950, 200, "star");
+      stars.create(2000, 210, "star");
+      stars.create(2050, 200, "star");
+      stars.create(2100, 210, "star");
+      stars.create(4400, 410, "star");
+      stars.create(4450, 400, "star");
+      stars.create(4500, 410, "star");
+      stars.create(4550, 400, "star");
+      stars.create(4600, 410, "star");
+      stars.create(5900, 210, "star");
+      stars.create(5950, 200, "star");
+      stars.create(6000, 210, "star");
+      stars.create(6050, 200, "star");
+      stars.create(6100, 210, "star");
 
       stars.children.iterate(function (child) {
         child.setBounceY(Phaser.Math.FloatBetween(0.6, 0.8));
@@ -266,19 +298,155 @@ const Level1 = () => {
       apples = this.physics.add.group();
 
       apples
-        .create(400, 300, "apple")
+        .create(800, 600, "apple")
         .anims.play("appleSpin", true)
         .setScale(1);
       apples
-        .create(800, 300, "apple")
+        .create(850, 600, "apple")
         .anims.play("appleSpin", true)
         .setScale(1);
       apples
-        .create(1200, 300, "apple")
+        .create(900, 600, "apple")
         .anims.play("appleSpin", true)
         .setScale(1);
       apples
-        .create(1600, 300, "apple")
+        .create(950, 600, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(1000, 600, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(1050, 600, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(1100, 600, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(1150, 600, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(2300, 500, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(2350, 500, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(2400, 500, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(2450, 500, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(2500, 500, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(2900, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(2950, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(3000, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(3050, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(3100, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(3400, 500, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(3450, 500, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(3500, 500, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(3550, 500, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(3600, 500, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(4900, 400, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(4950, 400, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(5000, 400, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(5050, 400, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(5100, 400, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(5400, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(5450, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(5500, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(5550, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(5600, 300, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(7100, 100, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(7150, 100, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(7200, 100, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(7250, 100, "apple")
+        .anims.play("appleSpin", true)
+        .setScale(1);
+      apples
+        .create(7300, 100, "apple")
         .anims.play("appleSpin", true)
         .setScale(1);
 
@@ -313,11 +481,12 @@ const Level1 = () => {
       // -------------> DUCKS <------------- //
 
       ducks = this.physics.add.group();
+
       const duckPositions = [
-        { x: 600, y: 500 },
-        { x: 800, y: 300 },
-        { x: 1200, y: 400 },
-        { x: 1600, y: 350 },
+        { x: 1000, y: 500 },
+        { x: 1500, y: 300 },
+        { x: 2000, y: 400 },
+        { x: 2500, y: 350 },
       ];
 
       duckPositions.forEach((pos) => {
@@ -332,6 +501,8 @@ const Level1 = () => {
       this.physics.add.collider(ducks, platforms);
       this.physics.add.collider(player, ducks, hitduck, null, this);
 
+      // -------------> CHICKEN <------------- //
+
       this.anims.create({
         key: "chickenWalk",
         frames: this.anims.generateFrameNumbers("chicken", {
@@ -344,15 +515,19 @@ const Level1 = () => {
 
       chickens = this.physics.add.group();
       const chicken1 = chickens
-        .create(600, 500, "chicken")
+        .create(2000, 500, "chicken")
         .setVelocityX(100)
         .anims.play("chickenWalk", true);
       const chicken2 = chickens
-        .create(1200, 400, "chicken")
+        .create(2500, 400, "chicken")
         .setVelocityX(100)
         .anims.play("chickenWalk", true);
       const chicken3 = chickens
-        .create(1800, 350, "chicken")
+        .create(3000, 350, "chicken")
+        .setVelocityX(100)
+        .anims.play("chickenWalk", true);
+      const chicken4 = chickens
+        .create(3500, 300, "chicken")
         .setVelocityX(100)
         .anims.play("chickenWalk", true);
 
@@ -374,14 +549,22 @@ const Level1 = () => {
         loop: true,
       });
 
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changechickenDirection(chicken4),
+        loop: true,
+      });
+
       this.physics.add.collider(chickens, platforms);
       this.physics.add.collider(player, chickens, hitchicken, null, this);
+
+      // -------------> PLANT <------------- //
 
       plants = this.physics.add.group();
       peas = this.physics.add.group();
 
-      const plant1 = plants.create(1200, 700, "plant");
-      const plant2 = plants.create(1800, 650, "plant");
+      const plant1 = plants.create(3000, 400, "plant");
+      const plant2 = plants.create(2000, 650, "plant");
 
       this.anims.create({
         key: "plantIdle",
@@ -410,6 +593,8 @@ const Level1 = () => {
       this.physics.add.overlap(player, peas, hitPea, null, this);
       this.physics.add.collider(peas, platforms, destroyPea, null, this);
 
+      // -------------> CAMALEON <------------- //
+
       this.anims.create({
         key: "camaelonWalk",
         frames: this.anims.generateFrameNumbers("camaelon", {
@@ -423,11 +608,11 @@ const Level1 = () => {
       camaelons = this.physics.add.group();
 
       const camaelon1 = camaelons
-        .create(1400, 400, "camaelon")
+        .create(3500, 400, "camaelon")
         .setVelocityX(200)
         .anims.play("camaelonWalk", true);
       const camaelon2 = camaelons
-        .create(1900, 350, "camaelon")
+        .create(4500, 350, "camaelon")
         .setVelocityX(250)
         .anims.play("camaelonWalk", true);
 
@@ -455,11 +640,11 @@ const Level1 = () => {
       background.tilePositionX = this.cameras.main.scrollX;
 
       if (cursors.left.isDown) {
-        player.setVelocityX(speedBoostActive ? -600 : -150);
+        player.setVelocityX(speedBoostActive ? -300 : -150);
         player.anims.play("left", true);
         lastDirection = "left";
       } else if (cursors.right.isDown) {
-        player.setVelocityX(speedBoostActive ? 600 : 150);
+        player.setVelocityX(speedBoostActive ? 300 : 150);
         player.anims.play("right", true);
         lastDirection = "right";
       } else {
@@ -469,8 +654,8 @@ const Level1 = () => {
       }
 
       if (cursors.up.isDown && player.body.touching.down && !isJumping) {
-        player.setVelocityY(jumpBoostActive ? -600 : -350);
-        this.sound.play("jumpSound");
+        player.setVelocityY(jumpBoostActive ? -450 : -350);
+        this.sound.play("jumpSound", { volume: 0.8 });
         isJumping = true;
       }
 
@@ -544,7 +729,7 @@ const Level1 = () => {
       speedBoost.disableBody(true, true);
       speedBoostActive = true;
 
-      this.sound.play("speedSound", { volume: 0.2 });
+      this.sound.play("speedSound", { volume: 0.1 });
 
       this.time.delayedCall(
         10000,
@@ -813,6 +998,62 @@ const Level1 = () => {
       }
     }
 
+    function reachGoal(player) {
+      this.physics.pause();
+      player.setTint(0x00ff00);
+
+      const victoryText = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY - 200,
+        "¡Nivel completado!",
+        { fontSize: "64px", fill: "#fff" }
+      );
+      victoryText.setOrigin(0.5, 0.5);
+      victoryText.setScrollFactor(0);
+
+      ducks.children.iterate(function (duck) {
+        duck.anims.stop();
+        duck.body.setVelocity(0);
+      });
+
+      chickens.children.iterate(function (chicken) {
+        chicken.anims.stop();
+        chicken.body.setVelocity(0);
+      });
+
+      camaelons.children.iterate(function (camaelon) {
+        camaelon.anims.stop();
+        camaelon.body.setVelocity(0);
+      });
+
+      const nextLevelButton = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY - 50,
+        "Siguiente Nivel",
+        { fontSize: "32px", fill: "#fff" }
+      );
+      nextLevelButton.setOrigin(0.5, 0.5);
+      nextLevelButton.setInteractive();
+      nextLevelButton.on("pointerdown", () => {
+        window.location.href = "/level2";
+      });
+      nextLevelButton.setScrollFactor(0);
+
+      // Opción para salir
+      const exitButton = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY + 50,
+        "Salir",
+        { fontSize: "32px", fill: "#fff" }
+      );
+      exitButton.setOrigin(0.5, 0.5);
+      exitButton.setInteractive();
+      exitButton.on("pointerdown", () => {
+        window.location.href = "/";
+      });
+      exitButton.setScrollFactor(0);
+    }
+
     function gameOver() {
       this.physics.pause();
 
@@ -872,6 +1113,16 @@ const Level1 = () => {
       gameOverText.setScrollFactor(0);
       restartButton.setScrollFactor(0);
       exitButton.setScrollFactor(0);
+
+      this.input.keyboard.on("keydown-R", () => {
+        this.scene.restart();
+        this.input.keyboard.enabled = true;
+      });
+
+      this.input.keyboard.on("keydown-r", () => {
+        this.scene.restart();
+        this.input.keyboard.enabled = true;
+      });
     }
 
     return () => {
