@@ -3,14 +3,23 @@ import { useEffect } from "react";
 
 const Home = () => {
   useEffect(() => {
-    document.body.style.backgroundColor = "#0e0e2";
+
+    document.body.style.backgroundImage = 'url("../../public/assets/menu/background.jpg")';
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+
     return () => {
-      document.body.style.backgroundColor = "";
+      document.body.style.backgroundImage = "";
     };
   }, []);
 
   return (
     <div style={styles.container}>
+      <audio autoPlay loop>
+        <source src="../../public/assets/menu/intro.ogg" type="audio/ogg" />
+        Tu navegador no soporta el elemento de audio.
+      </audio>
       <h1 style={styles.title}>Leap of Legends</h1>
       <h2 style={styles.subtitle}>Select a Level</h2>
       <div style={styles.buttonContainer}>
@@ -39,8 +48,7 @@ const styles = {
     textAlign: "center",
     marginTop: "100px",
     padding: "25px",
-    backgroundImage: "url('../public/assets/menu/bg.png')",
-    backgroundPosition: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: "20px",
     width: "100%",
     height: "auto",
