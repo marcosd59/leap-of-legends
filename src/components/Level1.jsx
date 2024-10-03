@@ -16,29 +16,30 @@ const Level1 = () => {
       physics: {
         default: "arcade",
         arcade: {
-          gravity: { y: 300 },
+          gravity: { y: 300 }, // Gravedad en el eje Y
           debug: false,
         },
       },
       scene: {
-        preload,
-        create,
-        update,
+        preload, // Función para cargar recursos
+        create, // Función para inicializar el nivel
+        update, // Función de actualización en cada frame
       },
       parent: gameContainer.current,
     };
 
     const game = new Phaser.Game(config);
 
+    // Función para cargar los recursos necesarios antes de iniciar el nivel
     function preload() {
       /******************** TERRENO *********************************/
-
+      // Cargar imágenes del terreno del nivel
       this.load.image("sky", "/assets/level1/terrain/sky.png");
       this.load.image("ground", "/assets/level1/terrain/platform.png");
       this.load.image("goal", "/assets/level1/terrain/end.png");
 
       /******************** ITEMS *********************************/
-
+      // Cargar imágenes de los ítems coleccionables del nivel
       this.load.image("star", "/assets/level1/items/star.png");
       this.load.image("diamond", "/assets/level1/items/diamond.png");
       this.load.spritesheet("apple", "/assets/level1/items/apple.png", {
@@ -47,7 +48,7 @@ const Level1 = () => {
       });
 
       /******************** POWER-UPS *********************************/
-
+      // Cargar imágenes de los power-ups
       this.load.image("speedBoost", "/assets/level1/power-ups/velocidad.png");
       this.load.image("heart", "/assets/level1/power-ups/heart.png");
       this.load.image("lifeKit", "/assets/level1/power-ups/life.png");
@@ -56,7 +57,7 @@ const Level1 = () => {
       this.load.image("bullet", "/assets/level1/power-ups/bullet.png");
 
       /******************** SOUNDS *********************************/
-
+      // Cargar archivos de sonido para el nivel
       this.load.audio("liveSound", "/assets/level1/songs/Live.ogg");
       this.load.audio("hitSound", "/assets/level1/songs/Hit.ogg");
       this.load.audio("jumpSound", "/assets/level1/songs/Jump.ogg");
@@ -72,14 +73,14 @@ const Level1 = () => {
       this.load.audio("gameOverSound", "/assets/level1/songs/GameOver.ogg");
 
       /******************** PLAYER *********************************/
-
+      // Cargar sprites del personaje principal
       this.load.spritesheet("dude", "/assets/level1/character/dude.png", {
         frameWidth: 32,
         frameHeight: 48,
       });
 
       /******************** ENEMIES *********************************/
-
+      // Cargar sprites de los enemigos
       this.load.spritesheet("duck", "/assets/level1/enemies/duck.png", {
         frameWidth: 36,
         frameHeight: 36,
@@ -101,6 +102,8 @@ const Level1 = () => {
         frameHeight: 38,
       });
     }
+
+    // Variables globales del nivel
 
     let player;
 
@@ -126,6 +129,7 @@ const Level1 = () => {
     let peas;
     let camaelons;
 
+    // Estado del jugador (dirección, power-ups activos, etc.)
     let lastDirection = "right";
     let speedBoostActive = false;
     let jumpBoostActive = false;
@@ -133,8 +137,11 @@ const Level1 = () => {
     let nextLifeAt = 1000;
     let isJumping = true;
 
+    // Función que inicializa el nivel
     function create() {
       /**************************** BACKGROUND *****************************/
+      // Crear el fondo del nivel y ajustar el tamaño de la cámara
+
       background = this.add.tileSprite(0, 0, 20000, 2800, "sky");
       background.setOrigin(0, 0);
       background.setScale(0.5);
@@ -148,6 +155,8 @@ const Level1 = () => {
       ground.setScale(60, 2).refreshBody();
 
       /**************************** MÚSICA DE FONDO *****************************/
+      // Reproducir música de fondo
+
       const music = this.sound.add("backgroundMusic", {
         volume: 0.1,
         loop: true,
@@ -156,6 +165,8 @@ const Level1 = () => {
       music.play();
 
       /**************************** PLAYER *****************************/
+      // Inicializar al personaje jugador con propiedades como rebote y colisión
+
       player = this.physics.add.sprite(32, this.scale.height - 150, "dude");
       player.setBounce(0.2);
       player.setCollideWorldBounds(true);
@@ -178,6 +189,7 @@ const Level1 = () => {
       });
 
       /**************************** META *****************************/
+      // Crear el objeto meta que el jugador debe alcanzar para completar el nivel
 
       this.goal = this.physics.add.sprite(7900, 705, "goal");
       this.goal.body.allowGravity = false;
@@ -186,6 +198,8 @@ const Level1 = () => {
       this.physics.add.overlap(player, this.goal, reachGoal, null, this);
 
       /**************************** PLATAFORMAS *****************************/
+      // Crear plataformas en diferentes posiciones
+
       platforms.create(500, 600, "ground").setScale(0.8, 0.8).refreshBody();
       platforms.create(1500, 600, "ground").setScale(0.8, 0.8).refreshBody();
       platforms.create(2000, 400, "ground").setScale(0.8, 0.8).refreshBody();
@@ -201,6 +215,7 @@ const Level1 = () => {
       platforms.create(7200, 600, "ground").setScale(0.8, 0.8).refreshBody();
 
       /**************************** POWER UPS *****************************/
+      // Crear los power-ups y añadirles colisiones
 
       const jumpBoots = this.physics.add.group();
       jumpBoots.create(2700, 600, "jumpBoots");
@@ -244,6 +259,7 @@ const Level1 = () => {
       this.physics.add.collider(bullets, platforms, destroyBullet, null, this);
 
       /**************************** ITEMS *****************************/
+      // Crear ítems coleccionables (diamantes, estrellas y manzanas)
 
       diamonds = this.physics.add.group();
       diamonds.create(2600, 110, "diamond");
@@ -469,6 +485,7 @@ const Level1 = () => {
       this.physics.add.overlap(player, apples, collectApple, null, this);
 
       /**************************** SCORE *****************************/
+      // Mostrar el puntaje del jugador
 
       scoreText = this.add
         .text(16, 50, "Score: 0", {
@@ -480,6 +497,7 @@ const Level1 = () => {
       cursors = this.input.keyboard.createCursorKeys();
 
       /**************************** LIVES *****************************/
+      // Mostrar las vidas del jugador con íconos de corazones
 
       hearts = this.add.group({
         key: "heart",
@@ -492,6 +510,7 @@ const Level1 = () => {
       });
 
       /**************************** ENEMIES *****************************/
+      // Inicializar los enemigos (patos, pollos, plantas, camaleones)
 
       // -------------> DUCKS <------------- //
 
