@@ -63,6 +63,13 @@ const Level1 = () => {
       this.load.audio("speedSound", "/assets/level1/songs/Speed.ogg");
       this.load.audio("bootsSound", "/assets/level1/songs/Boots.ogg");
       this.load.audio("pistolSound", "/assets/level1/songs/Pistol.ogg");
+      this.load.audio("starSound", "/assets/level1/songs/Star.ogg");
+      this.load.audio("diamondSound", "/assets/level1/songs/Diamond.ogg");
+      this.load.audio("appleSound", "/assets/level1/songs/Apple.ogg");
+      this.load.audio("damageSound", "/assets/level1/songs/Damage.ogg");
+      this.load.audio("goalSound", "/assets/level1/songs/Win.ogg");
+      this.load.audio("backgroundMusic", "/assets/level1/songs/Music.ogg");
+      this.load.audio("gameOverSound", "/assets/level1/songs/GameOver.ogg");
 
       /******************** PLAYER *********************************/
 
@@ -139,6 +146,14 @@ const Level1 = () => {
 
       const ground = platforms.create(0, this.scale.height - 32, "ground");
       ground.setScale(60, 2).refreshBody();
+
+      /**************************** MÚSICA DE FONDO *****************************/
+      const music = this.sound.add("backgroundMusic", {
+        volume: 0.1,
+        loop: true,
+      });
+
+      music.play();
 
       /**************************** PLAYER *****************************/
       player = this.physics.add.sprite(32, this.scale.height - 150, "dude");
@@ -487,6 +502,11 @@ const Level1 = () => {
         { x: 1500, y: 300 },
         { x: 2000, y: 400 },
         { x: 2500, y: 350 },
+        { x: 3000, y: 300 },
+        { x: 6500, y: 300 },
+        { x: 7200, y: 400 },
+        { x: 7500, y: 500 },
+        { x: 7900, y: 600 },
       ];
 
       duckPositions.forEach((pos) => {
@@ -530,6 +550,26 @@ const Level1 = () => {
         .create(3500, 300, "chicken")
         .setVelocityX(100)
         .anims.play("chickenWalk", true);
+      const chicken5 = chickens
+        .create(5000, 500, "chicken")
+        .setVelocityX(100)
+        .anims.play("chickenWalk", true);
+      const chicken6 = chickens
+        .create(5500, 400, "chicken")
+        .setVelocityX(100)
+        .anims.play("chickenWalk", true);
+      const chicken7 = chickens
+        .create(6500, 350, "chicken")
+        .setVelocityX(100)
+        .anims.play("chickenWalk", true);
+      const chicken8 = chickens
+        .create(7500, 300, "chicken")
+        .setVelocityX(100)
+        .anims.play("chickenWalk", true);
+      const chicken9 = chickens
+        .create(7900, 600, "chicken")
+        .setVelocityX(100)
+        .anims.play("chickenWalk", true);
 
       this.time.addEvent({
         delay: Phaser.Math.Between(2000, 4000),
@@ -555,6 +595,36 @@ const Level1 = () => {
         loop: true,
       });
 
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changechickenDirection(chicken5),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changechickenDirection(chicken6),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changechickenDirection(chicken7),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changechickenDirection(chicken8),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changechickenDirection(chicken9),
+        loop: true,
+      });
+
       this.physics.add.collider(chickens, platforms);
       this.physics.add.collider(player, chickens, hitchicken, null, this);
 
@@ -565,6 +635,11 @@ const Level1 = () => {
 
       const plant1 = plants.create(3000, 400, "plant");
       const plant2 = plants.create(2000, 650, "plant");
+      const plant3 = plants.create(5000, 400, "plant");
+      const plant4 = plants.create(6000, 200, "plant");
+      const plant5 = plants.create(7000, 600, "plant");
+      const plant6 = plants.create(7300, 300, "plant");
+      const plant7 = plants.create(7500, 500, "plant");
 
       this.anims.create({
         key: "plantIdle",
@@ -586,6 +661,36 @@ const Level1 = () => {
       this.time.addEvent({
         delay: 1300,
         callback: () => shootPea(plant2),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: 1300,
+        callback: () => shootPea(plant3),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: 1300,
+        callback: () => shootPea(plant4),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: 1300,
+        callback: () => shootPea(plant5),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: 1300,
+        callback: () => shootPea(plant6),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: 1300,
+        callback: () => shootPea(plant7),
         loop: true,
       });
 
@@ -615,6 +720,22 @@ const Level1 = () => {
         .create(4500, 350, "camaelon")
         .setVelocityX(250)
         .anims.play("camaelonWalk", true);
+      const camaelon3 = camaelons
+        .create(6000, 500, "camaelon")
+        .setVelocityX(200)
+        .anims.play("camaelonWalk", true);
+      const camaelon4 = camaelons
+        .create(7200, 500, "camaelon")
+        .setVelocityX(200)
+        .anims.play("camaelonWalk", true);
+      const camaelon5 = camaelons
+        .create(7500, 700, "camaelon")
+        .setVelocityX(200)
+        .anims.play("camaelonWalk", true);
+      const camaelon6 = camaelons
+        .create(7900, 600, "camaelon")
+        .setVelocityX(200)
+        .anims.play("camaelonWalk", true);
 
       this.time.addEvent({
         delay: Phaser.Math.Between(2000, 4000),
@@ -625,6 +746,30 @@ const Level1 = () => {
       this.time.addEvent({
         delay: Phaser.Math.Between(2000, 4000),
         callback: () => changeCamaelonDirection(camaelon2),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changeCamaelonDirection(camaelon3),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changeCamaelonDirection(camaelon4),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changeCamaelonDirection(camaelon5),
+        loop: true,
+      });
+
+      this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000),
+        callback: () => changeCamaelonDirection(camaelon6),
         loop: true,
       });
 
@@ -691,6 +836,7 @@ const Level1 = () => {
     /* ITEMS */
 
     function collectStar(player, star) {
+      this.sound.play("starSound", { volume: 1 });
       star.disableBody(true, true);
       score += 10;
       scoreText.setText("Score: " + score);
@@ -702,6 +848,7 @@ const Level1 = () => {
     }
 
     function collectDiamond(player, diamond) {
+      this.sound.play("diamondSound", { volume: 1 });
       diamond.disableBody(true, true);
       score += 50;
       scoreText.setText("Score: " + score);
@@ -713,6 +860,7 @@ const Level1 = () => {
     }
 
     function collectApple(player, apple) {
+      this.sound.play("appleSound", { volume: 1 });
       apple.disableBody(true, true);
       score += 30;
       scoreText.setText("Score: " + score);
@@ -966,7 +1114,7 @@ const Level1 = () => {
 
       lives--;
       isInvulnerable = true;
-
+      scene.sound.play("damageSound", { volume: 0.3 });
       if (lives >= 0) {
         hearts.getChildren()[lives].setVisible(false);
       }
@@ -1001,7 +1149,7 @@ const Level1 = () => {
     function reachGoal(player) {
       this.physics.pause();
       player.setTint(0x00ff00);
-
+      this.sound.play("goalSound", { volume: 1 });
       const victoryText = this.add.text(
         this.cameras.main.centerX,
         this.cameras.main.centerY - 200,
@@ -1039,7 +1187,6 @@ const Level1 = () => {
       });
       nextLevelButton.setScrollFactor(0);
 
-      // Opción para salir
       const exitButton = this.add.text(
         this.cameras.main.centerX,
         this.cameras.main.centerY + 50,
@@ -1056,6 +1203,8 @@ const Level1 = () => {
 
     function gameOver() {
       this.physics.pause();
+      this.sound.stopAll();
+      this.sound.play("gameOverSound", { volume: 0.7 });
 
       player.setTint(0xff0000);
       player.anims.play("turn");
