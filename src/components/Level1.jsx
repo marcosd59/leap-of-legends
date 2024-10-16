@@ -32,16 +32,16 @@ const Level1 = () => {
 
     function preload() {
       /******************** TERRENO *********************************/
-
-      this.load.image("sky", "/assets/level1/terrain/sky.png");
+      // Cargar imágenes del terreno del nivel
+      this.load.image("sky", "/assets/level1/terrain/sky.jpg");
       this.load.image("ground", "/assets/level1/terrain/platform.png");
       this.load.image("goal", "/assets/level1/terrain/end.png");
 
       /******************** ITEMS *********************************/
-
-      this.load.image("star", "/assets/level1/items/star.png");
-      this.load.image("diamond", "/assets/level1/items/diamond.png");
-      this.load.spritesheet("apple", "/assets/level1/items/apple.png", {
+      // Cargar imágenes de los ítems coleccionables del nivel
+      this.load.image("star", "/assets/level1/items/pc.png");
+      this.load.image("diamond", "/assets/level1/items/cafe.png");
+      this.load.spritesheet("apple", "/assets/level1/items/hotdog.png", {
         frameWidth: 32,
         frameHeight: 30,
       });
@@ -137,7 +137,7 @@ const Level1 = () => {
       /**************************** BACKGROUND *****************************/
       background = this.add.tileSprite(0, 0, 20000, 2800, "sky");
       background.setOrigin(0, 0);
-      background.setScale(0.5);
+      background.setScale(0.55);
 
       this.cameras.main.setBounds(0, 0, 8000, 800);
       this.physics.world.setBounds(0, 0, 8000, 800);

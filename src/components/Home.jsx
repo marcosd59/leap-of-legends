@@ -3,8 +3,8 @@ import { useEffect } from "react";
 
 const Home = () => {
   useEffect(() => {
-
-    document.body.style.backgroundImage = 'url("../../public/assets/menu/background.jpg")';
+    document.body.style.backgroundImage =
+      'url("../../public/assets/menu/menu.jpg")';
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
