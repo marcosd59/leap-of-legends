@@ -137,7 +137,7 @@ const Level1 = () => {
       /**************************** BACKGROUND *****************************/
       background = this.add.tileSprite(0, 0, 20000, 2800, "sky");
       background.setOrigin(0, 0);
-      background.setScale(0.55);
+      background.setScale(1);
 
       this.cameras.main.setBounds(0, 0, 8000, 800);
       this.physics.world.setBounds(0, 0, 8000, 800);
@@ -149,7 +149,7 @@ const Level1 = () => {
 
       /**************************** MÚSICA DE FONDO *****************************/
       const music = this.sound.add("backgroundMusic", {
-        volume: 0.1,
+        volume: 0.3,
         loop: true,
       });
 
@@ -1243,8 +1243,7 @@ const Level1 = () => {
       restartButton.setOrigin(0.5, 0.5);
       restartButton.setInteractive();
       restartButton.on("pointerdown", () => {
-        this.scene.restart();
-        this.input.keyboard.enabled = true;
+        location.reload();
       });
 
       const exitButton = this.add.text(
@@ -1264,13 +1263,11 @@ const Level1 = () => {
       exitButton.setScrollFactor(0);
 
       this.input.keyboard.on("keydown-R", () => {
-        this.scene.restart();
-        this.input.keyboard.enabled = true;
+        location.reload();
       });
 
       this.input.keyboard.on("keydown-r", () => {
-        this.scene.restart();
-        this.input.keyboard.enabled = true;
+        location.reload();
       });
     }
 
