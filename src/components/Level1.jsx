@@ -32,16 +32,16 @@ const Level1 = () => {
 
     function preload() {
       /******************** TERRENO *********************************/
-
-      this.load.image("sky", "/assets/level1/terrain/sky.png");
+      // Cargar imágenes del terreno del nivel
+      this.load.image("sky", "/assets/level1/terrain/sky.jpg");
       this.load.image("ground", "/assets/level1/terrain/platform.png");
       this.load.image("goal", "/assets/level1/terrain/end.png");
 
       /******************** ITEMS *********************************/
-
-      this.load.image("star", "/assets/level1/items/star.png");
-      this.load.image("diamond", "/assets/level1/items/diamond.png");
-      this.load.spritesheet("apple", "/assets/level1/items/apple.png", {
+      // Cargar imágenes de los ítems coleccionables del nivel
+      this.load.image("star", "/assets/level1/items/pc.png");
+      this.load.image("diamond", "/assets/level1/items/cafe.png");
+      this.load.spritesheet("apple", "/assets/level1/items/hotdog.png", {
         frameWidth: 32,
         frameHeight: 30,
       });
@@ -137,7 +137,7 @@ const Level1 = () => {
       /**************************** BACKGROUND *****************************/
       background = this.add.tileSprite(0, 0, 20000, 2800, "sky");
       background.setOrigin(0, 0);
-      background.setScale(0.5);
+      background.setScale(1);
 
       this.cameras.main.setBounds(0, 0, 8000, 800);
       this.physics.world.setBounds(0, 0, 8000, 800);
@@ -149,7 +149,7 @@ const Level1 = () => {
 
       /**************************** MÚSICA DE FONDO *****************************/
       const music = this.sound.add("backgroundMusic", {
-        volume: 0.1,
+        volume: 0.3,
         loop: true,
       });
 
@@ -1243,8 +1243,7 @@ const Level1 = () => {
       restartButton.setOrigin(0.5, 0.5);
       restartButton.setInteractive();
       restartButton.on("pointerdown", () => {
-        this.scene.restart();
-        this.input.keyboard.enabled = true;
+        location.reload();
       });
 
       const exitButton = this.add.text(
@@ -1264,13 +1263,11 @@ const Level1 = () => {
       exitButton.setScrollFactor(0);
 
       this.input.keyboard.on("keydown-R", () => {
-        this.scene.restart();
-        this.input.keyboard.enabled = true;
+        location.reload();
       });
 
       this.input.keyboard.on("keydown-r", () => {
-        this.scene.restart();
-        this.input.keyboard.enabled = true;
+        location.reload();
       });
     }
 
