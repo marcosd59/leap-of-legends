@@ -12,7 +12,7 @@ const Home = () => {
     document.body.style.backgroundRepeat = "no-repeat";
 
     if (audioRef.current) {
-      audioRef.current.volume = 0.1;
+      audioRef.current.volume = 0.3;
     }
 
     return () => {
