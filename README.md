@@ -16,9 +16,9 @@
 
 ![NIVEL 1](./public/screenshots/level1.png)
 
-### Nivel 2 - Edificio de G (Ingenierías)
+### Nivel 4 - Edificio de G (Ingenierías)
 
-![NIVEL 2](./public/screenshots/level2.png)
+![NIVEL 4](./public/screenshots/level4.png)
 
 ## Tecnologías utilizadas
 
