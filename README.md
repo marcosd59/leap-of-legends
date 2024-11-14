@@ -12,9 +12,13 @@
 
 ## Capturas de pantalla
 
-### Nivel 1 - Salto del Novato
+### Nivel 1 - Edificio de C (SAC)
 
-![NIVEL 1](./public/screenshots/leap-of-legneds-level1-v0.png)
+![NIVEL 1](./public/screenshots/level1.png)
+
+### Nivel 2 - Edificio de G (Ingeniería)
+
+![NIVEL 2](./public/screenshots/level2.png)
 
 ## Tecnologías utilizadas
 
