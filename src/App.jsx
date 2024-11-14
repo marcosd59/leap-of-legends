@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./components/Home";
 import Level1 from "./components/Level1";
+import Level4 from "./components/Level4";
 
 function App() {
   return (
@@ -8,6 +9,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/level1" element={<Level1 />} />
+        <Route path="/level4" element={<Level4 />} />
         <Route path="*" element={<Home />} />
       </Routes>
     </Router>
