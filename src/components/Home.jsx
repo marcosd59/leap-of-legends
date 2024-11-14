@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef } from "react";
+import logo from "../../public/assets/menu/logo.png";
 
 const Home = () => {
   const audioRef = useRef(null);
@@ -12,7 +13,7 @@ const Home = () => {
     document.body.style.backgroundRepeat = "no-repeat";
 
     if (audioRef.current) {
-      audioRef.current.volume = 0.3;
+      audioRef.current.volume = 0.2;
     }
 
     return () => {
@@ -26,9 +27,19 @@ const Home = () => {
         <source src="../../public/assets/menu/intro.ogg" type="audio/ogg" />
         Tu navegador no soporta el elemento de audio.
       </audio>
-      <h1 style={styles.title}>Leap of Legends</h1>
+      <img src={logo} alt="Logo" style={styles.logo} />
       <h2 style={styles.subtitle}>Selecciona un nivel</h2>
       <div style={styles.buttonContainer}>
+        <Link to="/historia">
+          <button style={{ ...styles.button, ...styles.historyButtom }}>
+            Historia
+          </button>
+        </Link>
+        <Link to="/level0">
+          <button style={{ ...styles.button, ...styles.tutorialButton }}>
+            Tutorial
+          </button>
+        </Link>
         <Link to="/level1">
           <button style={styles.button}>Nivel 1</button>
         </Link>
@@ -60,10 +71,11 @@ const styles = {
     margin: "auto",
     boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
   },
-  title: {
-    fontSize: "36px",
-    color: "#333",
-    marginBottom: "20px",
+  logo: {
+    width: "300px",
+    height: "auto",
+    margin: "0",
+    padding: "0",
   },
   subtitle: {
     fontSize: "24px",
@@ -86,6 +98,12 @@ const styles = {
     borderRadius: "5px",
     cursor: "pointer",
     transition: "background-color 0.3s",
+  },
+  tutorialButton: {
+    backgroundColor: "orangered",
+  },
+  historyButtom: {
+    backgroundColor: "dodgerblue",
   },
 };
 
