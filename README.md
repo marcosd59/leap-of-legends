@@ -99,8 +99,6 @@ npm run dev
 
 Este comando iniciará un servidor local y te proporcionará una URL (normalmente `http://localhost:5173`) donde podrás ver el juego en tu navegador.
 
-Aquí tienes la sección actualizada con los detalles adicionales para que los desarrolladores agreguen nuevos enemigos, armas, poderes, ítems y música, sin repetir elementos del nivel 1 pero reutilizando funciones existentes como `gameOver` o `reachGoal`:
-
 ### 7. Realizar cambios y desarrollar tu nivel
 
 Ahora puedes comenzar a trabajar en tu nivel en la rama `nivel-2-oceano`. Asegúrate de hacer todos los cambios necesarios para que tu nivel sea único, pero al mismo tiempo mantén consistencia con el resto del juego.
