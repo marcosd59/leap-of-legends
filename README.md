@@ -12,9 +12,13 @@
 
 ## Capturas de pantalla
 
-### Nivel 1 - Salto del Novato
+### Nivel 1 - Edificio de C (SAC)
 
-![NIVEL 1](./public/screenshots/leap-of-legneds-level1-v0.png)
+![NIVEL 1](./public/screenshots/level1.png)
+
+### Nivel 4 - Edificio de G (Ingenierías)
+
+![NIVEL 4](./public/screenshots/level4.png)
 
 ## Tecnologías utilizadas
 
@@ -94,8 +98,6 @@ npm run dev
 ```
 
 Este comando iniciará un servidor local y te proporcionará una URL (normalmente `http://localhost:5173`) donde podrás ver el juego en tu navegador.
-
-Aquí tienes la sección actualizada con los detalles adicionales para que los desarrolladores agreguen nuevos enemigos, armas, poderes, ítems y música, sin repetir elementos del nivel 1 pero reutilizando funciones existentes como `gameOver` o `reachGoal`:
 
 ### 7. Realizar cambios y desarrollar tu nivel
 
