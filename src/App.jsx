@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./components/Home";
+import History from "./components/History";
 import Level1 from "./components/Level1";
 import Level4 from "./components/Level4";
 import Level5 from "./components/Level5";
