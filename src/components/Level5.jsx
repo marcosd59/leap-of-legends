@@ -38,7 +38,7 @@ const Level5 = () => {
       frameHeight: 48,
     });
     this.load.spritesheet("boss", "/assets/level5/enemies/boss.png", {
-      frameWidth: 46.1,
+      frameWidth: 44,
       frameHeight: 43,
     });
     this.load.image("projectile", "/assets/level1/power-ups/bullet.png");
@@ -109,7 +109,7 @@ const Level5 = () => {
     });
     this.anims.create({
       key: "bossRight",
-      frames: this.anims.generateFrameNumbers("boss", { start: 5, end: 8 }),
+      frames: this.anims.generateFrameNumbers("boss", { start: 4, end: 7 }),
       frameRate: 10,
       repeat: -1,
     });
@@ -126,7 +126,13 @@ const Level5 = () => {
       defaultKey: "projectile",
       maxSize: 10,
     });
-    this.physics.add.collider(player, boss.projectiles, hitByProjectile, null, this);
+    this.physics.add.collider(
+      player,
+      boss.projectiles,
+      hitByProjectile,
+      null,
+      this
+    );
     bossAttackEvent = this.time.addEvent({
       delay: 5000,
       callback: bossAttack,
@@ -249,6 +255,9 @@ const Level5 = () => {
       this.scene.restart();
       this.input.keyboard.enabled = true;
     });
+    restartButton.on("pointerdown", () => {
+      location.reload();
+    });
     const exitButton = this.add.text(
       this.cameras.main.centerX,
       this.cameras.main.centerY + 100,
@@ -277,7 +286,12 @@ const Level5 = () => {
   function updateBossHealthBar() {
     bossHealthBar.clear();
     bossHealthBar.fillStyle(0xff0000, 1);
-    bossHealthBar.fillRect(1300, 16, (bossDuckHealth / bossDuckMaxHealth) * 200, 20);
+    bossHealthBar.fillRect(
+      1300,
+      16,
+      (bossDuckHealth / bossDuckMaxHealth) * 200,
+      20
+    );
     bossHealthBar.setScrollFactor(0);
   }
 
