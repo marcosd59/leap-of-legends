@@ -74,9 +74,10 @@ const Level4 = () => {
 
       /******************** PLAYER *********************************/
       // Cargar sprites del personaje principal
-      this.load.spritesheet("dave", "/assets/level4/character/Dav.png", {
+      this.load.spritesheet("dave", "/assets/level1/character/dude.png", {
         frameWidth: 32,
-        frameHeight: 32,
+        frameHeight: 48,
+        // frameHeight: 32,
       });
 
       /******************** ENEMIES *********************************/
@@ -187,7 +188,8 @@ const Level4 = () => {
 
       this.anims.create({
         key: "right",
-        frames: this.anims.generateFrameNumbers("dave", { start: 4, end: 7 }),
+        frames: this.anims.generateFrameNumbers("dave", { start: 5, end: 8 }),
+        // frames: this.anims.generateFrameNumbers("dave", { start: 4, end: 7 }),
         frameRate: 10,
         repeat: -1,
       });
