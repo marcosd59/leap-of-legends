@@ -15,6 +15,7 @@ const Home = () => {
 
     const playAudio = () => {
       if (audioRef.current) {
+        audioRef.current.volume = 0.1;
         audioRef.current.play().catch(() => {
           console.warn(
             "Audio autoplay bloqueado, esperando interacción del usuario."
@@ -43,7 +44,7 @@ const Home = () => {
       <h2 style={styles.subtitle}>Selecciona un nivel</h2>
       <div style={styles.buttonContainer}>
         <Link to="/historia">
-          <button style={{ ...styles.button, ...styles.historyButtom }}>
+          <button style={{ ...styles.button, ...styles.historyButton }}>
             Historia
           </button>
         </Link>
@@ -114,7 +115,7 @@ const styles = {
   tutorialButton: {
     backgroundColor: "orangered",
   },
-  historyButtom: {
+  historyButton: {
     backgroundColor: "dodgerblue",
   },
 };
