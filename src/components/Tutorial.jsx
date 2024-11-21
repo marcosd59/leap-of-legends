@@ -127,7 +127,7 @@ const LevelTutorial = () => {
 
       /**************************** MÚSICA DE FONDO *****************************/
       const music = this.sound.add("backgroundMusic", {
-        volume: 0.1,
+        volume: 0.9,
         loop: true,
       });
       music.play();
@@ -372,8 +372,8 @@ const LevelTutorial = () => {
             "Este una pistola. Usalo para matar enemigos por 10 segundos",
         },
         {
-          x: 3900,
-          y: 650,
+          x: 3700,
+          y: 700,
           message: "¡Llega a la meta para completar el nivel!",
         },
       ];
