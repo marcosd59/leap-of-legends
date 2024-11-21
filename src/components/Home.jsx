@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import logo from "../../public/assets/menu/logo.png";
 import background from "../../public/assets/menu/background.png";
+import Music from "../../public/assets/menu/intro.ogg";
 
 const Home = () => {
   const audioRef = useRef(null);
@@ -24,7 +25,7 @@ const Home = () => {
   return (
     <div style={styles.container}>
       <audio ref={audioRef} autoPlay loop>
-        <source src="../../public/assets/menu/intro.ogg" type="audio/ogg" />
+        <source src={Music} type="audio/ogg" />
         Tu navegador no soporta el elemento de audio.
       </audio>
       <img src={logo} alt="Logo" style={styles.logo} />
