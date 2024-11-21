@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Video from "../../public/assets/menu/historia.mp4";
+import Fondo from "../../public/assets/menu/fondo.jpg";
 
 const History = () => {
   return (
@@ -24,7 +25,7 @@ const styles = {
     justifyContent: "center",
     minHeight: "100vh",
     width: "100vw",
-    backgroundImage: 'url("../../public/assets/menu/fondo.jpg")',
+    backgroundImage: `url(${Fondo})`,
     backgroundSize: "cover",
     backgroundPosition: "center",
     padding: "40px",
