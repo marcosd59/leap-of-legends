@@ -158,7 +158,7 @@ const Level1 = () => {
       // Reproducir música de fondo
 
       const music = this.sound.add("backgroundMusic", {
-        volume: 0.3,
+        volume: 0.2,
         loop: true,
       });
 
