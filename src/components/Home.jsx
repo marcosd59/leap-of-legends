@@ -13,18 +13,29 @@ const Home = () => {
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
 
-    if (audioRef.current) {
-      audioRef.current.volume = 0.2;
-    }
+    const playAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {
+          console.warn(
+            "Audio autoplay bloqueado, esperando interacción del usuario."
+          );
+        });
+      }
+    };
+
+    window.addEventListener("click", playAudio);
+    window.addEventListener("touchstart", playAudio);
 
     return () => {
       document.body.style.backgroundImage = "";
+      window.removeEventListener("click", playAudio);
+      window.removeEventListener("touchstart", playAudio);
     };
   }, []);
 
   return (
     <div style={styles.container}>
-      <audio ref={audioRef} autoPlay loop>
+      <audio ref={audioRef} loop>
         <source src={Music} type="audio/ogg" />
         Tu navegador no soporta el elemento de audio.
       </audio>
