@@ -115,7 +115,7 @@ const LevelTutorial = () => {
       /**************************** BACKGROUND *****************************/
       background = this.add.tileSprite(0, 0, 4000, 800, "sky");
       background.setOrigin(0, 0);
-      background.setScale(1);
+      background.setScale(0.95);
 
       this.cameras.main.setBounds(0, 0, 4000, 800);
       this.physics.world.setBounds(0, 0, 4000, 800);
