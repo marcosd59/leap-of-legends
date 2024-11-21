@@ -115,7 +115,7 @@ const LevelTutorial = () => {
       /**************************** BACKGROUND *****************************/
       background = this.add.tileSprite(0, 0, 4000, 800, "sky");
       background.setOrigin(0, 0);
-      background.setScale(0.95);
+      background.setScale(1);
 
       this.cameras.main.setBounds(0, 0, 4000, 800);
       this.physics.world.setBounds(0, 0, 4000, 800);
@@ -510,7 +510,6 @@ const LevelTutorial = () => {
 
     function collectLifeKit(player, lifeKit) {
       lifeKit.disableBody(true, true);
-      this.sound.play("liveSound");
       this.sound.play("liveSound", { volume: 0.4 });
       if (lives < 3) {
         lives++;
