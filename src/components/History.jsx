@@ -1,12 +1,21 @@
 import { Link } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import Video from "../../public/assets/menu/historia.mp4";
 import Fondo from "../../public/assets/menu/fondo.jpg";
 
 const History = () => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = 0.5;
+    }
+  }, []);
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Leap of Legends</h1>
-      <video style={styles.video} controls>
+      <video ref={videoRef} style={styles.video} controls>
         <source src={Video} type="video/mp4" />
         Tu navegador no soporta el elemento de video.
       </video>
