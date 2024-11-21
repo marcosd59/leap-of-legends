@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
+import Video from "../../public/assets/menu/historia.mp4";
 
 const History = () => {
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Leap of Legends</h1>
       <video style={styles.video} controls>
-        <source src="../../public/assets/menu/historia.mp4" type="video/mp4" />
+        <source src={Video} type="video/mp4" />
         Tu navegador no soporta el elemento de video.
       </video>
       <Link to="/menu">
