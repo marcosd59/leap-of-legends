@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import logo from "../../public/assets/menu/logo.png";
+import background from "../../public/assets/menu/background.png";
 
 const Home = () => {
   const audioRef = useRef(null);
 
   useEffect(() => {
-    document.body.style.backgroundImage =
-      'url("../../public/assets/menu/background.png")';
+    document.body.style.backgroundImage = `url(${background})`;
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
@@ -35,7 +35,7 @@ const Home = () => {
             Historia
           </button>
         </Link>
-        <Link to="/level0">
+        <Link to="/tutorial">
           <button style={{ ...styles.button, ...styles.tutorialButton }}>
             Tutorial
           </button>
