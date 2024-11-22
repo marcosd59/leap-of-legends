@@ -113,9 +113,10 @@ const LevelTutorial = () => {
 
     function create() {
       /**************************** BACKGROUND *****************************/
-      background = this.add.tileSprite(0, 0, 4000, 800, "sky");
+
+      background = this.add.tileSprite(0, 0, 20000, 2800, "sky");
       background.setOrigin(0, 0);
-      background.setScale(1);
+      background.setScale(0.4);
 
       this.cameras.main.setBounds(0, 0, 4000, 800);
       this.physics.world.setBounds(0, 0, 4000, 800);
@@ -700,9 +701,9 @@ const LevelTutorial = () => {
 
       const nextLevelButton = this.add.text(
         this.cameras.main.centerX,
-        this.cameras.main.centerY - 50,
+        this.cameras.main.centerY - 100,
         "Siguiente Nivel",
-        { fontSize: "32px", fill: "#fff" }
+        { fontSize: "36px", fill: "#dc2f02" }
       );
       nextLevelButton.setOrigin(0.5, 0.5);
       nextLevelButton.setInteractive();

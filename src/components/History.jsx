@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import Video from "../../public/assets/menu/historia.mp4";
-import Fondo from "../../public/assets/menu/fondo.jpg";
+import Fondo from "../../public/assets/tutorial/terrain/background.jpg";
 
 const History = () => {
   const videoRef = useRef(null);
