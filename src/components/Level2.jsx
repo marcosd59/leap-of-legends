@@ -1,195 +1,3 @@
-/*import React, { useEffect ,useRef} from 'react';
-import Phaser from 'phaser';
-import Level1 from './Level1'; // Importar si necesitas funciones compartidas
-
-let player, cursors, boss, bossHealthBar, background, platforms, bees, bossSpawned;
-let bossHealth = 100;
-let spawnBeeTimer;
-
-function Level2({ loseLife, gameOver, reachGoal })  {
-
-    useEffect(() => {
-        const gameContainer = useRef(null);
-        const config = {
-            type: Phaser.AUTO,
-            scale:{
-                mode: Phaser.Scale.FIT,
-                autoCenter: Phaser.Scale.CENTER_BOTH,
-                width: 1600,//800,
-                height: 800,//600,
-            },
-            physics: {
-                default: 'arcade',
-                arcade: {
-                    gravity: { y: 300 },
-                    debug: false,
-                },
-            },
-            scene: {
-                preload: preload,
-                create: create,
-                update: update,
-            },
-            parent: gameContainer.current,
-        };
-
-        const game = new Phaser.Game(config);
-
-        function preload() {
-            // Cargar imágenes de fondo, plataformas, jugador, abejas y jefe
-            this.load.image('background', '/assets/level2/fondo.jpg');
-            this.load.image('platform', '/path/to/platform.png');
-            this.load.image('boss', '/path/to/boss.png');
-            for (let i = 1; i <= 5; i++) {
-                this.load.image(`bee${i}`, `/path/to/bee${i}.png`);
-            }
-            this.load.spritesheet('player', '/assets/level2/personaj.png',{frameWidth: 32,
-                frameHeight: 48,}); // Imagen del personaje principal
-        }
-        
-        
-    
-        function create() {
-            // Fondo y desplazamiento
-            background = this.add.tileSprite(400, 300, 800, 600, 'background');
-            
-            //Animación del personaje principal
-
-            player = this.physics.add.sprite(32, this.scale.height - 150, "player");
-            //player.setBounce(0.2);
-            player.setCollideWorldBounds(true);
-
-            this.cameras.main.startFollow(player);
-            //this.physics.add.collider(player);
-
-            this.anims.create({
-                key: "left",
-                frames: this.anims.generateFrameNumbers("player", { start: 0, end: 5 }),
-                frameRate: 10,
-                repeat: -1,
-            });
-    
-            this.anims.create({
-                key: "right",
-                frames: this.anims.generateFrameNumbers("player", { start: 5, end: 11 }),
-                frameRate: 10,
-                repeat: -1,
-            });
-
-            // Crear plataformas
-            platforms = this.physics.add.staticGroup();
-            platforms.create(400, 500, 'platform').setScale(0.5).refreshBody();
-            platforms.create(600, 400, 'platform').setScale(0.5).refreshBody();
-            platforms.create(200, 300, 'platform').setScale(0.5).refreshBody();
-
-            // Configuración del jugador (personaje principal)
-            player = this.physics.add.sprite(400, 550, 'player');
-            player.setCollideWorldBounds(true);
-            this.physics.add.collider(player, platforms);
-
-            cursors = this.input.keyboard.createCursorKeys();
-
-            // Grupo de abejas
-            bees = this.physics.add.group();
-
-            // Temporizador para generar abejas de forma aleatoria
-            spawnBeeTimer = this.time.addEvent({
-                delay: 1000, // Intervalo en milisegundos entre cada aparición de abejas
-                callback: () => spawnRandomBee(this),
-                loop: true,
-            });
-
-            // Crear barra de salud del jefe
-            bossHealthBar = this.add.graphics();
-            bossHealthBar.fillStyle(0xff0000, 1);
-
-            bossSpawned = false; // Inicialmente, el jefe no ha aparecido
-        }
-
-        function update() {
-            // Desplazamiento del fondo hacia arriba
-            background.tilePositionY += 1;
-
-            // Movimiento del jugador
-            if (cursors.left.isDown) {
-                player.setVelocityX(-160);
-            } else if (cursors.right.isDown) {
-                player.setVelocityX(160);
-            } else {
-                player.setVelocityX(0);
-            }
-
-            if (cursors.up.isDown && player.body.touching.down) {
-                player.setVelocityY(-330);
-            }
-
-            // Aumentar velocidad de las abejas con el tiempo
-            bees.children.iterate((bee) => {
-                bee.setVelocityY(100 + Math.random() * 100);
-                if (bee.y > 600) bee.y = -10;
-            });
-
-            // Activar el jefe cuando el fondo ha avanzado lo suficiente
-            if (!bossSpawned && background.tilePositionY > 1500) {
-                spawnBoss(this);
-            }
-
-            // Actualizar barra de salud del jefe
-            if (bossSpawned) {
-                updateBossHealthBar();
-            }
-        }
-
-        function spawnRandomBee(scene) {
-            const randomX = Phaser.Math.Between(50, 750); // Posición X aleatoria
-            const randomBeeType = `bee${Phaser.Math.Between(1, 5)}`; // Selección aleatoria de la imagen de abeja
-            const bee = scene.physics.add.sprite(randomX, -50, randomBeeType);
-            bee.setVelocityY(100 + Math.random() * 100); // Velocidad inicial aleatoria
-            bees.add(bee);
-
-            // Detectar colisiones entre jugador y abejas
-            scene.physics.add.collider(player, bee, hitBee, null, scene);
-        }
-
-        function hitBee(player, bee) {
-            bee.destroy(); // Destruir la abeja al colisionar
-            loseLife(); // Llamar a la función para perder una vida
-        }
-
-        function spawnBoss(scene) {
-            bossSpawned = true;
-            boss = scene.physics.add.sprite(400, 100, 'boss');
-            boss.setCollideWorldBounds(true);
-            boss.setVelocityX(50);
-            scene.physics.add.collider(boss, platforms);
-            scene.physics.add.overlap(player, boss, damageBoss, null, scene);
-        }
-
-        function updateBossHealthBar() {
-            bossHealthBar.clear();
-            bossHealthBar.fillStyle(0xff0000, 1);
-            bossHealthBar.fillRect(10, 10, bossHealth, 20);
-        }
-
-        function damageBoss() {
-            bossHealth -= 10;
-            if (bossHealth <= 0) {
-                boss.disableBody(true, true);
-                bossSpawned = false;
-                reachGoal(); // Reutilizamos reachGoal para completar el nivel
-            }
-        }
-
-        return () => {
-            game.destroy(true);
-        };
-    }, [loseLife, gameOver, reachGoal]);
-
-    return <div id="game-container" />;
-}
-
-export default Level2;*/
-
 import React, { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 
@@ -202,7 +10,13 @@ function Level2({ loseLife, gameOver, reachGoal }) {
     let spawnBeeTimer;
     const projectileSpeed = -400;
     const beeMaxHits = 5;
-    
+    let score = 0;
+    let powerUps;
+    let scoreText;
+    let stars;
+    let hearts;
+    let lives = 3;
+    let trophy; // Trofeo
     const config = {
       type: Phaser.AUTO,
       scale: {
@@ -229,20 +43,22 @@ function Level2({ loseLife, gameOver, reachGoal }) {
     const game = new Phaser.Game(config);
     
     function preload() {
-      //this.load.image('background', '/assets/level2/fondo.jpg');
-      //this.load.image('platform', '/path/to/platform.png');
-      //this.load.spritesheet('boss', '/path/to/boss_sprite.png', { frameWidth: 64, frameHeight: 64 });
-      /*for (let i = 1; i <= 5; i++) {
-        this.load.spritesheet(`bee${i}`, `/assets/level2/bee${i}_abej.png`, { frameWidth: 32, frameHeight: 32 });
-      }*/
+      
      /******************** TERRENO *********************************/
       // Cargar imágenes del terreno del nivel
       this.load.image("background", "/assets/level2/fondo.jpg");
       this.load.image("ground", "/assets/level2/platform.png");
-      //this.load.image("goal", "/assets/level1/terrain/end.png");
-     this.load.spritesheet('bee', '/assets/level2/abej.png',{ frameWidth: 32, frameHeight: 48});
-      this.load.spritesheet('player', '/assets/level2/personaj.png', { frameWidth: 32, frameHeight: 48 });
-      this.load.image('projectile', '/path/to/projectile.png');
+      this.load.image("heart", "/assets/level2/heart.png");
+      this.load.image("goal", "/assets/level2/end.png");
+      this.load.spritesheet('bee', '/assets/level2/abej.png',{ frameWidth: 36, frameHeight: 34});
+      this.load.spritesheet('player', '/assets/level2/dude.png', { frameWidth: 32, frameHeight: 48 });
+      this.load.image("star", "/assets/level2/pc.png");
+      this.load.image("imune", "/assets/level2/imun.png");
+      this.load.image("velocidad", "/assets/level2/patin.png");
+      this.load.image("congela", "/assets/level2/congela.png");
+      this.load.image("calavera", "/assets/level2/calavera.png");
+      this.load.image("bomba", "/assets/level2/bomba.png");
+      //this.load.image('projectile', '/path/to/projectile.png');
     }
     let lastDirection = "right";
     let speedBoostActive = false;
@@ -253,11 +69,6 @@ function Level2({ loseLife, gameOver, reachGoal }) {
       platforms = this.physics.add.staticGroup();
       const ground = platforms.create(0, this.scale.height - 1, "ground");
       ground.setScale(20, 2).refreshBody();
-      //background = this.add.tileSprite(800, 400,'background');
-      /*platforms = this.physics.add.staticGroup();
-      platforms.create(400, 500, 'platform').setScale(0.5).refreshBody();
-      platforms.create(600, 400, 'platform').setScale(0.5).refreshBody();
-      platforms.create(200, 300, 'platform').setScale(0.5).refreshBody();*/
 
       player = this.physics.add.sprite(400, 550, 'player');
       player.setCollideWorldBounds(true);//para que el jugador no salga de la pantalla
@@ -266,76 +77,76 @@ function Level2({ loseLife, gameOver, reachGoal }) {
 
       this.anims.create({
         key: "left",
-        frames: this.anims.generateFrameNumbers("player", { start: 2, end: 4 }),
+        frames: this.anims.generateFrameNumbers("player", { start: 0, end: 4 }),
         frameRate: 10,
         repeat: -1,
       });
 
       this.anims.create({
         key: "right",
-        frames: this.anims.generateFrameNumbers("player", { start: 7, end: 9 }),
+        frames: this.anims.generateFrameNumbers("player", { start: 4, end: 8 }),
         frameRate: 10,
         repeat: -1,
       });
+      
+      //Items del personaje
+      // Crear un grupo para las estrellas
+      stars = this.physics.add.group();
 
+      // Temporizador para generar estrellas
+      this.time.addEvent({
+      delay: 1000, // Cada 1 segundos
+      callback: () => spawnStar(this),
+      loop: true,
+      });
+      /**************************** META *****************************/
+      // Crear el objeto meta que el jugador debe alcanzar para completar el nivel
+
+      let trophy; // Trofeo
+      // Temporizador de 3:30 minutos para mostrar el trofeo
+      this.time.delayedCall(210000, () => spawnTrophy(this), null, this);//210000
+
+      /**************************** SCORE *****************************/
+      // Mostrar el puntaje del jugador
+
+      scoreText = this.add
+        .text(16, 50, "Score: 0", {
+          fontSize: "32px",
+          fill: "#000",
+        })
+        .setScrollFactor(0);
+
+        //cursors = this.input.keyboard.createCursorKeys();
+
+        /**************************** LIVES *****************************/
+        // Mostrar las vidas del jugador con íconos de corazones
+  
+        hearts = this.add.group({
+          key: "heart",
+          repeat: 2,
+          setXY: { x: 16, y: 16, stepX: 40 },
+        });
+  
+        hearts.children.iterate(function (child) {
+          child.setScrollFactor(0);
+        });
+  
       //enemigos abejas
 
+      
+      
+      bees = this.physics.add.group();
+      beeHits = new Map();
+      //bees = this.physics.add.sprite(400, 550, 'bee');
       this.anims.create({
         key: 'fly',
         frames: this.anims.generateFrameNumbers('bee', { start: 0, end: 1 }),
         frameRate: 10,
-      repeat: -1,
-      });
-  
-  /*this.anims.create({
-    key: 'fly1',
-    frames: this.anims.generateFrameNumbers('bee', { start: 1, end: 2 }),
-    frameRate: 10,
-    repeat: -1,
-  });
-  
-  this.anims.create({
-    key: 'fly2',
-    frames: this.anims.generateFrameNumbers('bee', { start: 2, end: 3 }),
-    frameRate: 10,
-    repeat: -1,
-  });
-  
-  this.anims.create({
-    key: 'fly3',
-    frames: this.anims.generateFrameNumbers('bee', { start: 3, end: 4 }),
-    frameRate: 10,
-    repeat: -1,
-  });
-  
-  this.anims.create({
-    key: 'fly4',
-    frames: this.anims.generateFrameNumbers('bee', { start: 4, end: 5 }),
-    frameRate: 10,
-    repeat: -1,
-  });
-  
-  this.anims.create({
-    key: 'fly5',
-    frames: this.anims.generateFrameNumbers('bee', { start: 5, end: 6 }),
-    frameRate: 10,
-    repeat: -1,
-  });*/
-
-      //chickens = this.physics.add.group()
-      
-      bees = this.physics.add.group();
-      //bees = this.physics.add.sprite(400, 550, 'bee');
-      /*this.anims.create({
-        //key: "left",
-        frames: this.anims.generateFrameNumbers("bee", { start: 0, end: 5 }),
-        frameRate: 10,
-        repeat: -1,
-      });*/
+      repeat: -1,});
       beeHits = new Map();
 
       spawnBeeTimer = this.time.addEvent({
-        delay: 1000,
+        delay: 250,//tiempo en la que aparecen las abejas
         callback: () => spawnRandomBee(this),
         loop: true,
       });
@@ -348,30 +159,22 @@ function Level2({ loseLife, gameOver, reachGoal }) {
       this.input.keyboard.on('keydown-SPACE', () => {
         shootProjectile(this);
       });
-
-      bossHealthBar = this.add.graphics();
-      bossHealthBar.fillStyle(0xff0000, 1);
+  
       bossSpawned = false;
 
-      this.time.delayedCall(90000, () => {
-        spawnBoss(this);
+      /*******************Power Ups************************ */
+      powerUps = this.physics.add.group();
+
+      // Temporizador para generar ítems cada 0.25 segundos
+      this.time.addEvent({
+      delay: 20000, // 0.25 segundos
+      callback: () => spawnRandomPowerUp(this),
+      loop: true,
       });
     }
 
     function update() {
       //movimiento del personaje
-      //background.tilePositionY += 1;
-
-      /*if (cursors.left.isDown) {
-        player.setVelocityX(-160);
-        player.anims.play("left", true);
-        lastDirection = "left";
-      } else if (cursors.right.isDown) {
-        player.setVelocityX(160);
-      } else {
-        player.setVelocityX(0);
-      }*/
-
         if (cursors.left.isDown) {
           player.setVelocityX(speedBoostActive ? -300 : -150);
           player.anims.play("left", true);
@@ -388,10 +191,6 @@ function Level2({ loseLife, gameOver, reachGoal }) {
         }
   
 
-      /*if (cursors.up.isDown && player.body.touching.down) {
-        player.setVelocityY(-330);
-      }*/
-
       Phaser.Actions.Call(bees.getChildren(), (bee) => {
         bee.setVelocityY(100 + Math.random() * 100);
         if (bee.y > 8000) bee.y = -10;//bee.y=600, bee.y=-10
@@ -406,173 +205,293 @@ function Level2({ loseLife, gameOver, reachGoal }) {
         updateBossHealthBar();
       }
     }
+    function spawnRandomPowerUp(scene) {
+      const x = Phaser.Math.Between(50, scene.scale.width - 50); // Posición aleatoria
+  const powerUpTypes = ["imune", "velocidad", "congela", "calavera", "bomba"];
+  const randomType = Phaser.Utils.Array.GetRandom(powerUpTypes);
 
-    function spawnRandomBee(scene) {
-      /*const randomX = Phaser.Math.Between(50, 1550);
-      const randomy = Phaser.Math.Between(50, 750);
-      const randomBeeType = `bee${Phaser.Math.Between(0, 5)}`;
-      const bee = scene.physics.add.sprite(randomX, -50, randomBeeType);
-      bee.setVelocityY(100 + Math.random() * 100);
-      bees.add(bee);
-      beeHits.set(bee, 0);
+  const powerUp = scene.physics.add.sprite(x, 0, randomType);
+  powerUp.setVelocityY(150); // Velocidad de caída
+  powerUp.setCollideWorldBounds(true);
+  powerUps.add(powerUp);
 
-      scene.physics.add.overlap(projectiles, bee, (projectile, bee) => {
-        handleBeeHit(scene, bee, projectile);
+  // Parpadeo y desaparición después de 2 segundos
+  scene.time.delayedCall(3000, () => {
+    if (powerUp.active) {
+      powerUp.setAlpha(0.5);
+      scene.tweens.add({
+        targets: powerUp,
+        alpha: 0,
+        duration: 500,
+        onComplete: () => {
+          powerUp.destroy();
+        },
       });
-
-      scene.physics.add.collider(player, bee, () => hitBee(scene, player, bee));*/
-      /*const randomX = Phaser.Math.Between(50, 1550); // Posición X aleatoria
-    const bee = scene.physics.add.sprite(randomX, -50, 'bee'); // Usar siempre el spritesheet 'bee'
-
-    // Seleccionar un frame aleatorio del spritesheet
-    const randomFrame = Phaser.Math.Between(0, 5); // Ajusta según la cantidad de frames en el spritesheet
-    bee.setFrame(randomFrame); // Asigna un frame aleatorio
-
-    // Configurar la velocidad de caída
-    bee.setVelocityY(100 + Math.random() * 100);
-
-    // Agregar la abeja al grupo
-    bees.add(bee);
-
-    // Inicializar el contador de impactos
-    beeHits.set(bee, 0);
-
-    // Detectar colisiones entre proyectiles y abejas
-    scene.physics.add.overlap(projectiles, bee, (projectile, bee) => {
-        handleBeeHit(scene, bee, projectile);
-    });
-
-    // Detectar colisiones entre el jugador y las abejas
-    scene.physics.add.collider(player, bee, () => hitBee(scene, player, bee))*/
-    /*const randomX = Phaser.Math.Between(50, 1550); // Posición X aleatoria
-    const bee = scene.physics.add.sprite(randomX, -50, 'bee'); // Usar el spritesheet de las abejas
-
-    // Seleccionar un frame aleatorio (0 a 5)
-    const randomFrame = Phaser.Math.Between(0, 5);
-    bee.setFrame(randomFrame); // Asigna un frame aleatorio
-
-    // Configurar la velocidad de caída
-    bee.setVelocityY(100 + Math.random() * 100);
-
-    // Agregar la abeja al grupo
-    bees.add(bee);
-    //bees.play('fly'); // Animación de vuelo
-    // Inicializar el contador de impactos
-    beeHits.set(bee, 0);
-
-    // Detectar colisiones entre proyectiles y abejas
-    scene.physics.add.overlap(projectiles, bee, (projectile, bee) => {
-        handleBeeHit(scene, bee, projectile);
-    });
-
-    // Detectar colisiones entre el jugador y las abejas
-    scene.physics.add.collider(player, bee, () => hitBee(scene, player, bee));*/
-    const randomX = Phaser.Math.Between(50, 1550);
-    const bee = scene.physics.add.sprite(randomX, -50, 'bee');
-    bee.setFrame(Phaser.Math.Between(0, 5));
-    bee.setVelocityY(100 + Math.random() * 100);
-    bees.add(bee);
-    //bee.play('fly'); // Reproducir animación de vuelo
-     // Reproducir animación de vuelo solo si la abeja está en pantalla
-    if (bee.y > 0 && bee.y < scene.scale.height) {
-      bee.play('fly');
     }
+  });
+    
+      // Colisión con el jugador
+      scene.physics.add.collider(powerUp, platforms);
+      scene.physics.add.overlap(player, powerUp, () => handlePowerUpCollision(scene, powerUp));
+    }    
+    
+    function handlePowerUpCollision(scene, powerUp) {
+      const type = powerUp.texture.key;
+      powerUp.destroy(); // Eliminar ítem después de recogerlo
+    
+      switch (type) {
+        case "velocidad":
+          applySpeedBoost(scene);
+          break;
+    
+        case "calavera":
+          invertControls(scene);
+          break;
+    
+        case "bomba":
+          clearScreen(scene);
+          break;
+    
+        case "congela":
+          freezeBees(scene);
+          break;
+    
+        case "imune":
+          applyImmunity(scene);
+          break;
+      }
+    }
+        
+    //Función para aplicar el aumento de velocidad
+    function applySpeedBoost(scene) {
+      speedBoostActive = true;
+      scene.time.delayedCall(5000, () => {
+        //speedBoostActive = false; // Restaurar velocidad normal
+      });
+    }    
+    //Función para invertir los controles
+    function invertControls(scene) {
+      let inverted = true;
+      scene.time.delayedCall(10000, () => {
+        inverted = false; // Restaurar controles normales
+      });
+    
+      cursors.left.isDown = inverted ? cursors.right.isDown : cursors.left.isDown;
+      cursors.right.isDown = inverted ? cursors.left.isDown : cursors.right.isDown;
+    }    
+    //Función para limpiar la pantalla
+    function clearScreen(scene) {
+      scene.cameras.main.flash(300, 255, 0, 0); // Efecto de pantalla
+      powerUps.clear(true, true); // Eliminar ítems
+      bees.clear(true, true); // Eliminar abejas
+    }
+        
+    //Función para congelar las abejas
+    function freezeBees(scene) {
+      bees.children.iterate((bee) => bee.setVelocityY(0)); // Detener abejas
+      scene.time.delayedCall(5000, () => {
+        bees.children.iterate((bee) => bee.setVelocityY(150)); // Restaurar movimiento
+      });
+    }    
+    //Función para aplicar inmunidad
+    function applyImmunity(scene) {
+      player.setTint(0x00ff00); // Cambiar color del jugador para indicar inmunidad
+      scene.physics.add.overlap(player, bees, (player, bee) => {
+        bee.destroy(); // Eliminar abejas al tocarlas
+      });
+    
+      scene.time.delayedCall(10000, () => {
+        player.clearTint(); // Restaurar estado normal
+        scene.physics.world.removeCollider(player); // Eliminar efecto
+      });
+    }
+        
+                      
+    //Función para generar las estrellas
+    function spawnStar(scene) {
+      const x = Phaser.Math.Between(50, scene.scale.width - 50); // Posición horizontal aleatoria
+      const star = scene.physics.add.sprite(x, 0, "star");
+      star.setVelocityY(150); // Velocidad de caída
+      star.setCollideWorldBounds(true);
+    
+      // Añadir estrella al grupo
+      stars.add(star);
+    
+      // Desaparecer la estrella después de 2 segundos
+      scene.time.delayedCall(3000, () => {
+        if (star.active) {
+          star.setAlpha(0.5); // Parpadeo antes de desaparecer
+          scene.tweens.add({
+            targets: star,
+            alpha: 0,
+            duration: 500,
+            onComplete: () => {
+              star.destroy();
+            },
+          });
+        }
+      });
+    
+      // Colisión con el jugador
+      scene.physics.add.collider(star, platforms);
+      scene.physics.add.overlap(player, star, () => collectStar(scene, star));
+    }
+    function collectStar(scene, star) {
+      star.destroy(); // Eliminar la estrella del juego
+      score += 10; // Incrementar puntuación
+      scoreText.setText(`Puntos: ${score}`); // Actualizar texto en pantalla
+    }
+    
+    //Función para actualizar la barra de salud del personaje
+    function loseLife(scene) {
+      /*if (isInvulnerable) return;
 
-      /*const randomX = Phaser.Math.Between(50, 1550);
-      const bee_Forms = [0, 1, 2, 3, 4, 5]; // Formas de abeja
-      const selectedForm = Phaser.Math.RND.pick(beeForms);
-      const bee = scene.physics.add.sprite(randomX, -50, 'bee');
-      bee.setFrame(selectedForm - 1); // Establecer frame inicial
-      bee.setVelocityY(100 + Math.random() * 100);
-      bees.add(bee);
-  
-    // Reproducir animación de vuelo solo para la forma seleccionada
-    if (selectedForm === 0) {
-      bee.anims.play('fly'); // Animación para forma 1
-    } else if (selectedForm === 1) {
-      bee.anims.play('fly1'); // Animación para forma 2
-    } else if (selectedForm === 2) {
-      bee.anims.play('fly2'); // Animación para forma 3
-    } else if (selectedForm === 3) {
-      bee.anims.play('fly3'); // Animación para forma 4
-    } else if (selectedForm === 4) {
-      bee.anims.play('fly4'); // Animación para forma 5
-    } else if (selectedForm === 5) {
-      bee.anims.play('fly5'); // Animación para forma 6
-    }*/
-  
+      lives--;
+      isInvulnerable = true;
+      scene.sound.play("damageSound", { volume: 0.3 });
+      if (lives >= 0) {
+        hearts.getChildren()[lives].setVisible(false);
+      }
+
+      if (lives === 0) {
+        gameOver.call(scene);
+      } else {
+        const blinkTimer = scene.time.addEvent({
+          delay: 100,
+          callback: () => {
+            player.visible = !player.visible;
+          },
+          repeat: 30,
+        });
+
+        scene.time.delayedCall(3000, () => {
+          isInvulnerable = false;
+          player.visible = true;
+          blinkTimer.remove();
+        });
+      }*/
+        lives--;
+        const hearts = scene.hearts.getChildren();
+        if (lives >= 0 && hearts[lives]) {
+          hearts[lives].setVisible(false);
+        }
+
+        if (lives <= 0) {
+          endGame(scene);
+        }
+    }
+    //Función para crear la meta del nivel
+    function spawnTrophy(scene) {
+      // Crea el trofeo en el centro superior de la pantalla
+      trophy = scene.physics.add.sprite(scene.scale.width / 2, 0, "goal");
+      trophy.setVelocityY(100); // Velocidad de caída
+      trophy.setCollideWorldBounds(true);
+      trophy.setBounce(0.5);
+    
+      // Colisión del trofeo con plataformas
+      scene.physics.add.collider(trophy, platforms); 
+      //Colision entre el jugador y el trofeo
+      // Colisión del trofeo con el jugador
+      scene.physics.add.overlap(player, trophy, () => gameWin(scene));//handleTrophyCollision(scene));
+    }
+    function gameWin(scene) {
+      // Detiene todo movimiento y físicas
+      //trophy.setVelocity(0);
+      //trophy.setBounce(0);
+      scene.physics.pause();
+      player.setTint(0x00ff00);
+      bees.children.iterate(function (bee) {
+        bee.anims.stop();
+        bee.body.setVelocity(0);
+      });
+      //this.sound.play("goalSound", { volume: 1 });
+        const victoryText = scene.add.text(
+        scene.cameras.main.centerX,
+        scene.cameras.main.centerY - 200,
+        "¡Nivel completado!",
+        { fontSize: "64px", fill: "#fff" }
+      );
+      victoryText.setOrigin(0.5, 0.5);
+      victoryText.setScrollFactor(0);
+
+      const nextLevelButton = scene.add.text(
+        scene.cameras.main.centerX,
+        scene.cameras.main.centerY - 50,
+        "Siguiente Nivel",
+        { fontSize: "32px", fill: "#fff" }
+      );
+      nextLevelButton.setOrigin(0.5, 0.5);
+      nextLevelButton.setInteractive();
+      nextLevelButton.on("pointerdown", () => {
+        window.location.href = "/level3";
+      });
+      nextLevelButton.setScrollFactor(0);
+
+      const exitButton = scene.add.text(
+        scene.cameras.main.centerX,
+        scene.cameras.main.centerY + 50,
+        "Salir",
+        { fontSize: "32px", fill: "#fff" }
+      );
+      exitButton.setOrigin(0.5, 0.5);
+      exitButton.setInteractive();
+      exitButton.on("pointerdown", () => {
+        window.location.href = "/";
+      });
+      exitButton.setScrollFactor(0);
+    }
+    function spawnRandomBee(scene) {
+     
+    const randomX = Phaser.Math.Between(50,1550);//scene.scale.width - 100
+    const bee = scene.physics.add.sprite(randomX, 0, 'bees');//-50
+    bee.setCollideWorldBounds(false);//bee.setFrame(Phaser.Math.Between(0, 5));
+    bee.setVelocityY(100 + Math.random() * 100);//bee.setVelocity(Phaser.Math.Between(-50, 50), 100 + Math.random() * 100);
+    // Seleccionar marco aleatorio para la abeja
+    const randomFrame = Phaser.Math.Between(0, 4);
+    bee.setFrame(randomFrame);
+
+    bee.play('fly');
+
     beeHits.set(bee, 0);
-  
+
     scene.physics.add.overlap(projectiles, bee, (projectile, bee) => {
       handleBeeHit(scene, bee, projectile);
     });
-  
+
     scene.physics.add.collider(player, bee, () => hitBee(scene, player, bee));
+    //hitBee(scene, player, bee)
   }
 
     function handleBeeHit(scene, bee, projectile) {
-      /*projectile.destroy();
-      beeHits.set(bee, beeHits.get(bee) + 1);
+     
 
-      if (beeHits.get(bee) >= beeMaxHits) {
-        bee.destroy();
-        beeHits.delete(bee);
-        // Drop item occasionally
-        if (Math.random() < 0.3) dropItem(scene, bee.x, bee.y);
-      }*/
-      // Destruir el proyectil al impactar
-      /*projectile.destroy();
-
-      // Incrementar el contador de impactos para la abeja
-      const hits = beeHits.get(bee) + 1;
-      beeHits.set(bee, hits);
-
-      // Verificar si la abeja ha recibido 3 impactos
-      if (hits >= 3) {
-          // Destruir la abeja tras 3 impactos
-          bee.destroy();
-
-          // Opcional: Agregar un efecto o animación al destruir la abeja
-          const explosion = scene.add.sprite(bee.x, bee.y, 'explosion');
-          explosion.play('explode');
-          scene.time.delayedCall(500, () => explosion.destroy());
-        }*/
-
-      // Destruir el proyectil al impactar
-    projectile.destroy();
-
-    // Incrementar el contador de impactos
-    const hits = beeHits.get(bee) + 1;
-    beeHits.set(bee, hits);
-
-    // Verificar si la abeja ha recibido 3 impactos
-    if (hits >= 3) {
-        // Destruir la abeja tras 3 impactos
-        bee.destroy();
-
-        // Opcional: Agregar un efecto visual al destruir la abeja
-        const explosion = scene.add.sprite(bee.x, bee.y, 'explosion');
-        explosion.play('explode');
-        scene.time.delayedCall(500, () => explosion.destroy());
-    }
     }
 
     function dropItem(scene, x, y) {
       // Implement item drop, similar to Level 1 logic
     }
 
-    function hitBee(scene, player, bee) {
-      bee.destroy();
-      loseLife();
-    }
+    /*function hitBee(scene, player, bee) {
+      loseLife(this);
+        player.setTint(0xff0000);
+
+        this.time.delayedCall(
+          500,
+          () => {
+            player.clearTint();
+          },
+          [],
+          this
+        );
+    }*/
 
     function spawnBoss(scene) {
       bossSpawned = true;
-      boss = scene.physics.add.sprite(400, 100, 'boss');
+      boss = scene.physics.add.sprite(400, 100, 'goal');
       boss.setCollideWorldBounds(true);
-      boss.setVelocityX(50);
+      boss.setVelocityX(0);
       scene.physics.add.collider(boss, platforms);
-      scene.physics.add.overlap(projectiles, boss, damageBoss, null, scene);
+      //scene.physics.add.overlap(projectiles, boss, damageBoss, null, scene);
     }
 
     function updateBossHealthBar() {
@@ -580,7 +499,86 @@ function Level2({ loseLife, gameOver, reachGoal }) {
       bossHealthBar.fillStyle(0xff0000, 1);
       bossHealthBar.fillRect(10, 10, bossHealth, 20);
     }
+    function reachGoal(player) {
+      this.physics.pause();
+        player.setTint(0x00ff00);
+      //this.sound.play("goalSound", { volume: 1 });
+        const victoryText = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY - 200,
+        "¡Nivel completado!",
+        { fontSize: "64px", fill: "#fff" }
+      );
+      victoryText.setOrigin(0.5, 0.5);
+      victoryText.setScrollFactor(0);
+        bees.children.iterate(function (bee) {
+        bee.anims.stop();
+        bee.body.setVelocity(0);
+      });
+      const nextLevelButton = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY - 50,
+        "Siguiente Nivel",
+        { fontSize: "32px", fill: "#fff" }
+      );
+      nextLevelButton.setOrigin(0.5, 0.5);
+      nextLevelButton.setInteractive();
+      nextLevelButton.on("pointerdown", () => {
+        window.location.href = "/level3";
+      });
+      nextLevelButton.setScrollFactor(0);
 
+      const exitButton = this.add.text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY + 50,
+        "Salir",
+        { fontSize: "32px", fill: "#fff" }
+      );
+      exitButton.setOrigin(0.5, 0.5);
+      exitButton.setInteractive();
+      exitButton.on("pointerdown", () => {
+        window.location.href = "/";
+      });
+      exitButton.setScrollFactor(0);
+    }
+    //Función Game Over
+    function endGame(scene) {
+      scene.physics.pause(); // Pausar toda la física
+      player.setTint(0xff0000); // Efecto visual de derrota
+      const gameOverText = scene.add.text(
+        scene.scale.width / 2,
+        scene.scale.height / 2,
+        "Game Over",
+        { fontSize: "64px", fill: "#ff0000" }
+      );
+      gameOverText.setOrigin(0.5, 0.5);
+    
+      // Opcional: Agregar botón para reiniciar el nivel o regresar al menú
+      const restartButton = scene.add.text(
+        scene.scale.width / 2,
+        scene.scale.height / 2 + 100,
+        "Reiniciar",
+        { fontSize: "32px", fill: "#ffffff" }
+      );
+      restartButton.setOrigin(0.5, 0.5);
+      restartButton.setInteractive();
+      restartButton.on("pointerdown", () => {
+        scene.scene.restart(); // Reinicia el nivel
+      });
+    }
+    function hitBee(scene, player, bee) {
+      if (!immunityActive) {
+        loseLife(scene); // Llamar a la función para reducir vida
+        player.setTint(0xff0000); // Mostrar daño
+        scene.time.delayedCall(500, () => player.clearTint()); // Quitar el tinte rojo tras 0.5 segundos
+      } else {
+        // Si hay inmunidad, destruir la abeja y sumar puntos
+        bee.destroy();
+        score += 20; // Ajusta el puntaje según sea necesario
+        scoreText.setText(`Puntos: ${score}`);
+      }
+    }
+    
     function damageBoss(boss, projectile) {
       projectile.destroy();
       bossHealth -= 10;

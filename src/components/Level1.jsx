@@ -537,7 +537,7 @@ const Level1 = () => {
         duck.flipX = duck.body.velocity.x < 0;
       });
 
-      //this.physics.add.collider(ducks, platforms);
+      this.physics.add.collider(ducks, platforms);
       this.physics.add.collider(player, ducks, hitduck, null, this);
 
       // -------------> CHICKEN <------------- //
