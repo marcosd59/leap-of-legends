@@ -97,7 +97,6 @@ const Level3 = () => {
       bloques.create(200, 420, "bloques").setScale(0.7).refreshBody();
       bloques.create(750, 700, "bloques").setScale(0.7).refreshBody();
       bloques.create(1050, 700, "bloques").setScale(0.7).refreshBody();
-      bloques.create(800, 380, "bloques").setScale(0.7).refreshBody();
       bloques.create(1300, 600, "bloques").setScale(0.7).refreshBody();
       bloques.create(1700, 600, "bloques").setScale(0.7).refreshBody();
       bloques.create(1700, 800, "bloques").setScale(0.7).refreshBody();
