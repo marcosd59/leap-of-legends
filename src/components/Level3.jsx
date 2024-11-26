@@ -17,7 +17,7 @@ const Level3 = () => {
         default: "arcade",
         arcade: {
           gravity: { y: 800 },
-          debug: false,
+          debug: false, // Desactivado para simplificar
         },
       },
       scene: {
@@ -60,6 +60,7 @@ const Level3 = () => {
     function create() {
       game_over = false;
 
+      // Música de fondo con volumen reducido
       musicadefondo = this.sound.add("musicfondo", {
         loop: true,
         volume: 0.2,
@@ -70,35 +71,32 @@ const Level3 = () => {
       const fondo = this.add.image(930, 475, "fondo");
       fondo.setScale(0.5);
 
-      // Puntos
+      // Puntuación
       textScore = this.add.text(770, 20, "SCORE: 0", {
         font: "40px Arial Black",
         fill: "#FF0000",
       });
       scorePerson = 0;
 
-      // Enemigos
+      // Enemigos simplificados
       enemigos = this.physics.add.group({
         key: "enemigo",
         setScale: { x: 0.3, y: 0.3 },
-        repeat: 2,
-        setXY: { x: 300, y: 50, stepX: 450 },
+        repeat: 1, // Reducido el número de enemigos
+        setXY: { x: 500, y: 50, stepX: 800 },
       });
 
       enemigos.children.iterate((enemigo) => {
         enemigo.setBounce(1);
-        enemigo.setVelocityX(40);
+        enemigo.setVelocityX(30); // Velocidad reducida
         enemigo.setCollideWorldBounds(true);
       });
 
-      // Bloques
+      // Bloques simplificados
       bloques = this.physics.add.staticGroup();
       bloques.create(350, 800, "bloques").setScale(0.7).refreshBody();
-      bloques.create(200, 420, "bloques").setScale(0.7).refreshBody();
       bloques.create(750, 700, "bloques").setScale(0.7).refreshBody();
-      bloques.create(1050, 700, "bloques").setScale(0.7).refreshBody();
       bloques.create(1300, 600, "bloques").setScale(0.7).refreshBody();
-      bloques.create(1700, 600, "bloques").setScale(0.7).refreshBody();
       bloques.create(1700, 800, "bloques").setScale(0.7).refreshBody();
 
       // Suelo
@@ -117,8 +115,8 @@ const Level3 = () => {
       items = this.physics.add.group({
         key: "item",
         setScale: { x: 0.4, y: 0.4 },
-        repeat: 4,
-        setXY: { x: 500, y: 50, stepX: 350 },
+        repeat: 2, // Menos items para simplificar
+        setXY: { x: 600, y: 50, stepX: 700 },
       });
 
       items.children.iterate((item) => item.setBounce(0.5));
@@ -126,7 +124,7 @@ const Level3 = () => {
       // Teclas
       cursors = this.input.keyboard.createCursorKeys();
 
-      // Game Over UI
+      // Interfaz de Game Over
       gameOverWindow = this.add
         .image(900, 500, "window")
         .setScale(0.4)
@@ -135,7 +133,9 @@ const Level3 = () => {
         .image(900, 800, "reset")
         .setScale(0.7)
         .setVisible(false);
-      botonReset.setInteractive().on("pointerdown", () => this.scene.restart());
+      botonReset
+        .setInteractive()
+        .on("pointerdown", () => window.location.reload());
       final_score = this.add
         .text(850, 290, "0", { font: "60px Arial Black", fill: "#FF0000" })
         .setVisible(false);
@@ -170,12 +170,6 @@ const Level3 = () => {
       item.disableBody(true, true);
       scorePerson += 100;
       textScore.setText("SCORE: " + scorePerson);
-
-      if (items.countActive() === 0) {
-        items.children.iterate((item) =>
-          item.enableBody(true, item.x, 10, true, true)
-        );
-      }
     }
 
     function gameOver() {
