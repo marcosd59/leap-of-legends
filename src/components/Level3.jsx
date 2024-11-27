@@ -125,7 +125,7 @@ const Level3 = () => {
       suelo = this.physics.add.staticGroup();
       for (let x = 90; x <= 1950; x += 155) {
         suelo
-          .create(x, 1020, "suelo")
+          .create(x, 920, "suelo")
           .setScale(0.1)
           .setSize(240, 120)
           .setOffset(635, 415);
