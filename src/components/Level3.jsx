@@ -78,10 +78,10 @@ const Level3 = () => {
       musicadefondo.play();
 
       // Fondo
-      const fondo = this.add.image(930, 475, "fondo").setScale(0.8);
+      const fondo = this.add.image(930, 550, "fondo").setScale(0.8);
 
       // Puntuación
-      textScore = this.add.text(770, 20, "SCORE: 0", {
+      textScore = this.add.text(770, 50, "SCORE: 0", {
         font: "40px Arial Black",
         fill: "#FF0000",
       });
@@ -92,7 +92,7 @@ const Level3 = () => {
         key: "enemigo",
         setScale: { x: 0.3, y: 0.3 },
         repeat: 0,
-        setXY: { x: 1000, y: 50, stepX: 350 },
+        setXY: { x: 1000, y: 150, stepX: 350 },
       });
 
       enemigos.children.iterate((enemigo) => {
@@ -104,14 +104,14 @@ const Level3 = () => {
       // Bloques
       bloques = this.physics.add.staticGroup();
       const bloquePosiciones = [
-        [250, 300],
-        [250, 800],
-        [580, 650],
-        [850, 350],
-        [1050, 650],
-        [1280, 400],
-        [1550, 700],
-        [1800, 500],
+        [250, 500],
+        [250, 900],
+        [580, 750],
+        [850, 450],
+        [1050, 750],
+        [1280, 600],
+        [1550, 800],
+        [1800, 600],
       ];
       bloquePosiciones.forEach(([x, y]) => {
         bloques
@@ -125,14 +125,14 @@ const Level3 = () => {
       suelo = this.physics.add.staticGroup();
       for (let x = 90; x <= 1950; x += 155) {
         suelo
-          .create(x, 920, "suelo")
+          .create(x, 1000, "suelo")
           .setScale(0.1)
           .setSize(240, 120)
           .setOffset(635, 415);
       }
 
       // Personaje
-      personaje = this.physics.add.sprite(90, 400, "personaje");
+      personaje = this.physics.add.sprite(90, 600, "personaje");
       personaje.setScale(0.4);
       personaje.setSize(300, 335).setOffset(2, 10);
       personaje.setCollideWorldBounds(true);
@@ -142,7 +142,7 @@ const Level3 = () => {
         key: "item",
         setScale: { x: 0.4, y: 0.4 },
         repeat: 4,
-        setXY: { x: 500, y: 50, stepX: 300 },
+        setXY: { x: 500, y: 150, stepX: 300 },
       });
 
       items.children.iterate((item) => item.setBounce(0.5));
@@ -152,48 +152,24 @@ const Level3 = () => {
 
       // Interfaz de Game Over
       gameOverWindow = this.add
-        .image(900, 500, "window")
+        .image(900, 550, "window")
         .setScale(0.4)
         .setVisible(false);
       botonReset = this.add
-        .image(900, 800, "reset")
+        .image(900, 850, "reset")
         .setScale(0.7)
         .setVisible(false)
         .setInteractive()
-        .on("pointerdown", () => this.scene.restart());
+        .on("pointerdown", () => window.location.reload()); // Recargar la página al hacer clic
       botonNext = this.add
-        .image(900, 900, "next")
+        .image(900, 950, "next")
         .setScale(0.2)
         .setVisible(false)
         .setInteractive()
         .on("pointerdown", () => this.scene.start("level4"));
       final_score = this.add
-        .text(850, 290, "0", { font: "60px Arial Black", fill: "#FF0000" })
+        .text(850, 390, "0", { font: "60px Arial Black", fill: "#FF0000" })
         .setVisible(false);
-
-      // Texto de nivel completado
-      levelCompleteText = this.add
-        .text(900, 400, "¡Nivel Completado!", {
-          font: "64px Arial Black",
-          fill: "#00FF00",
-        })
-        .setOrigin(0.5)
-        .setVisible(false);
-
-      // Botón para avanzar al siguiente nivel
-      nextButton = this.add
-        .text(900, 500, "Siguiente Nivel", {
-          font: "40px Arial",
-          fill: "#FFFFFF",
-          backgroundColor: "#000000",
-          padding: { x: 10, y: 10 },
-        })
-        .setOrigin(0.5)
-        .setInteractive()
-        .setVisible(false)
-        .on("pointerdown", () => {
-          window.location.href = "/level4";
-        });
 
       // Colisiones
       this.physics.add.collider(bloques, personaje);
@@ -239,7 +215,6 @@ const Level3 = () => {
         });
       }
 
-      // Mostrar nivel completado al alcanzar 100 puntos
       if (scorePerson >= 1000) {
         this.physics.pause();
         levelCompleteText.setVisible(true);
@@ -262,7 +237,16 @@ const Level3 = () => {
   }, []);
 
   return (
-    <div ref={gameContainer} style={{ width: "100vw", height: "100vh" }}></div>
+    <div
+      ref={gameContainer}
+      style={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    ></div>
   );
 };
 

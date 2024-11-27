@@ -110,7 +110,7 @@ function Level2({ loseLife, gameOver, reachGoal }) {
       // Reproducir música de fondo
 
       const music = this.sound.add("backgroundMusic", {
-        volume: 0.2,
+        volume: 0.4,
         loop: true,
       });
 
